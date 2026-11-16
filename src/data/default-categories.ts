@@ -1,0 +1,25 @@
+// Mirrors handle_new_user() in supabase/migrations/20261110000000_phase1_profiles.sql.
+// A test (data.test.ts) fails if the two lists drift apart.
+export const DEFAULT_CATEGORIES = [
+  { key: 'food', name: 'Food', kind: 'expense', color: '#E07A5F', icon: 'utensils' },
+  { key: 'restaurants', name: 'Restaurants', kind: 'expense', color: '#D4644A', icon: 'chef-hat' },
+  { key: 'transportation', name: 'Transportation', kind: 'expense', color: '#3D85C6', icon: 'bus' },
+  { key: 'fuel', name: 'Fuel', kind: 'expense', color: '#5B6C8F', icon: 'fuel' },
+  { key: 'shopping', name: 'Shopping', kind: 'expense', color: '#C2185B', icon: 'shopping-bag' },
+  { key: 'clothing', name: 'Clothing', kind: 'expense', color: '#8E5BB5', icon: 'shirt' },
+  { key: 'bills', name: 'Bills', kind: 'expense', color: '#E0A030', icon: 'receipt' },
+  { key: 'rent', name: 'Rent', kind: 'expense', color: '#8D6E63', icon: 'house' },
+  { key: 'healthcare', name: 'Healthcare', kind: 'expense', color: '#D64545', icon: 'heart-pulse' },
+  { key: 'entertainment', name: 'Entertainment', kind: 'expense', color: '#7E57C2', icon: 'clapperboard' },
+  { key: 'subscriptions', name: 'Subscriptions', kind: 'expense', color: '#26A69A', icon: 'repeat' },
+  { key: 'travel', name: 'Travel', kind: 'expense', color: '#29B6F6', icon: 'plane' },
+  { key: 'education', name: 'Education', kind: 'expense', color: '#5C6BC0', icon: 'graduation-cap' },
+  { key: 'personal', name: 'Personal expenses', kind: 'expense', color: '#EC407A', icon: 'user' },
+  { key: 'other_expense', name: 'Other', kind: 'expense', color: '#78909C', icon: 'circle-ellipsis' },
+  { key: 'salary', name: 'Salary', kind: 'income', color: '#2E9E6A', icon: 'briefcase' },
+  { key: 'freelance', name: 'Freelance', kind: 'income', color: '#43A047', icon: 'laptop' },
+  { key: 'business', name: 'Business', kind: 'income', color: '#0F766E', icon: 'building-2' },
+  { key: 'investments', name: 'Investments', kind: 'income', color: '#00897B', icon: 'trending-up' },
+  { key: 'gifts', name: 'Gifts', kind: 'income', color: '#F06292', icon: 'gift' },
+  { key: 'other_income', name: 'Other income', kind: 'income', color: '#78909C', icon: 'circle-plus' },
+] as const;

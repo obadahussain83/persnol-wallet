@@ -1,56 +1,41 @@
-# Welcome to your Expo app 👋
+# Personal Wallet
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Offline-first personal finance app for web, iOS and Android. Expo + React Native + PowerSync (local SQLite) + Supabase (Postgres, Auth, RLS).
 
-## Get started
+**Status:** Phase 0 (technical validation) complete. See [docs/DEVELOPMENT_PROGRESS.md](docs/DEVELOPMENT_PROGRESS.md).
 
-1. Install dependencies
+## Run
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Keep the project on a short path outside OneDrive/Dropbox (e.g. `C:/dev/personal-wallet`): native Android builds exceed Windows path limits and sync tools disturb builds.
 
 ```bash
-npm run reset-project
+npm install            # also copies PowerSync web workers into public/@powersync
+npm test               # money, ledger SQL, migration + RLS tests (no Docker needed)
+npm run web            # web app at http://localhost:8081
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Android (local Gradle builds fail on Windows: generated C++ paths exceed 260 chars, see DEVELOPMENT_PROGRESS) — build in the cloud:
 
-### Other setup steps
+```bash
+npx eas-cli@latest build --profile development --platform android
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Install the APK on a device/emulator, start Metro with `npx expo start`, and on the emulator run `adb reverse tcp:8081 tcp:8081` and open the app pointed at `http://localhost:8081` (the `10.0.2.2` route corrupted the bundle download on this machine).
 
-## Learn more
+iOS: `npx eas-cli@latest build --profile development --platform ios` (needs an Apple developer account).
 
-To learn more about developing your project with Expo, look at the following resources:
+Without `.env` the app runs **local-only** (fully usable, nothing syncs). To enable sync, copy `.env.example` to `.env` and follow "Cloud setup" in [docs/SYNC_ENGINE.md](docs/SYNC_ENGINE.md).
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Docs
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Doc | What |
+|---|---|
+| [PROJECT_PLAN](docs/PROJECT_PLAN.md) | Phases and scope |
+| [ARCHITECTURE](docs/ARCHITECTURE.md) | Stack, diagram, decisions, dependency assessment, cost, risks |
+| [DATABASE_SCHEMA](docs/DATABASE_SCHEMA.md) | Tables, money model, ledger rules |
+| [SYNC_ENGINE](docs/SYNC_ENGINE.md) | Offline writes, upload queue, conflicts, cloud setup |
+| [SECURITY](docs/SECURITY.md) | RLS, secrets, local data |
+| [TESTING](docs/TESTING.md) | Test strategy and what is covered |
+| [DEVELOPMENT_PROGRESS](docs/DEVELOPMENT_PROGRESS.md) | Checklist, known limitations |
+| [CHANGELOG](docs/CHANGELOG.md) | Changes |
+| [COMPETITOR_ANALYSIS](docs/COMPETITOR_ANALYSIS.md) | Market comparison and resulting priorities |

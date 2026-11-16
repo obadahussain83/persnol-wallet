@@ -1,0 +1,75 @@
+import type { Translations } from './en';
+
+export const ar: Translations = {
+  app: { name: 'المحفظة الشخصية' },
+  common: {
+    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', archive: 'أرشفة', restore: 'استعادة', add: 'إضافة',
+    confirm: 'تأكيد', retry: 'إعادة المحاولة', back: 'رجوع', showArchived: 'عرض المؤرشف', archived: 'مؤرشف', none: 'بدون', optional: 'اختياري',
+    all: 'الكل', moreOptions: 'خيارات إضافية', fewerOptions: 'خيارات أقل', search: 'بحث', viewAll: 'عرض الكل', today: 'اليوم', yesterday: 'أمس',
+  },
+  nav: { transactions: 'العمليات', add: 'إضافة', dashboard: 'لوحة التحكم', home: 'الرئيسية', accounts: 'الحسابات', debts: 'الديون', categories: 'الفئات', settings: 'الإعدادات', more: 'المزيد' },
+  auth: {
+    tagline: 'كل شيكل في مكانه.',
+    signIn: 'تسجيل الدخول', signUp: 'إنشاء حساب', email: 'البريد الإلكتروني', password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
+    forgotPassword: 'نسيت كلمة المرور؟', sendResetLink: 'إرسال رابط إعادة التعيين', resetSent: 'إذا كان هناك حساب بهذا البريد، فرابط إعادة التعيين في الطريق.',
+    setNewPassword: 'تعيين كلمة مرور جديدة', newPassword: 'كلمة المرور الجديدة', passwordUpdated: 'تم تحديث كلمة المرور.',
+    noAccount: 'ليس لديك حساب؟ أنشئ واحدًا', haveAccount: 'لديك حساب؟ سجّل الدخول',
+    checkEmail: 'تحقق من بريدك لتأكيد الحساب، ثم سجّل الدخول.', invalidLink: 'رابط إعادة التعيين غير صالح أو منتهي.',
+  },
+  errors: {
+    required: 'مطلوب', tooLong: 'طويل جدًا', invalid: 'قيمة غير صالحة', invalidAmount: 'مبلغ غير صالح لهذه العملة',
+    invalidEmail: 'أدخل بريدًا إلكترونيًا صالحًا', passwordShort: '8 أحرف على الأقل', passwordMismatch: 'كلمتا المرور غير متطابقتين',
+    currencyLocked: 'لا يمكن تغيير العملة بعد وجود معاملات على الحساب.',
+    invalidParent: 'اختر فئة رئيسية من النوع نفسه.', hasSubcategories: 'لا يمكن لفئة لها فئات فرعية أن تصبح فرعية.',
+    categoryInUse: 'هذه الفئة مستخدمة. قم بأرشفتها بدلًا من ذلك.', notFound: 'غير موجود.', chooseAccount: 'اختر حسابًا.', chooseCategory: 'اختر فئة.', amountPositive: 'أدخل مبلغًا أكبر من صفر.', sameAccount: 'اختر حسابين مختلفين.', generic: 'حدث خطأ ما. حاول مرة أخرى.',
+    dbOpenTitle: 'تعذّر فتح بياناتك على هذا الجهاز', dbOpenHint: 'لم يُفقد شيء. أغلق علامات التبويب أو النوافذ الأخرى لهذا التطبيق، ثم حاول مرة أخرى.',
+  },
+  accountTypes: { cash: 'نقدًا', bank: 'حساب بنكي', wallet: 'محفظة رقمية', savings: 'توفير', other: 'أخرى' },
+  accounts: {
+    title: 'الحسابات', new: 'حساب جديد', edit: 'تعديل الحساب', name: 'الاسم', type: 'النوع', currency: 'العملة',
+    openingBalance: 'الرصيد الافتتاحي', description: 'الوصف', color: 'اللون', icon: 'الأيقونة',
+    empty: 'لا توجد حسابات بعد', emptyHint: 'أضف حساباتك النقدية والبنكية والمحافظ لتبدأ التتبع.',
+    archiveTitle: 'أرشفة هذا الحساب؟', archiveBody: 'سيُخفى من القوائم والمجاميع. يبقى سجله محفوظًا ويمكنك استعادته في أي وقت.',
+    currencyLockedHint: 'مقفلة: هذا الحساب لديه معاملات.',
+  },
+  categories: {
+    title: 'الفئات', new: 'فئة جديدة', edit: 'تعديل الفئة', name: 'الاسم', kind: 'النوع', parent: 'الفئة الرئيسية',
+    expense: 'مصروف', income: 'دخل', empty: 'لا توجد فئات', deleteTitle: 'حذف هذه الفئة؟',
+    deleteBody: 'لا يمكن التراجع عن ذلك.', archiveTitle: 'أرشفة هذه الفئة؟',
+    archiveBody: 'ستُؤرشف فئاتها الفرعية أيضًا. تحتفظ المعاملات السابقة بها.',
+    defaults: {
+      food: 'طعام', restaurants: 'مطاعم', transportation: 'مواصلات', fuel: 'وقود', shopping: 'تسوق',
+      clothing: 'ملابس', bills: 'فواتير', rent: 'إيجار', healthcare: 'رعاية صحية', entertainment: 'ترفيه',
+      subscriptions: 'اشتراكات', travel: 'سفر', education: 'تعليم', personal: 'مصاريف شخصية',
+      other_expense: 'أخرى', salary: 'راتب', freelance: 'عمل حر', business: 'أعمال', investments: 'استثمارات',
+      gifts: 'هدايا', other_income: 'دخل آخر',
+    },
+  },
+  settings: {
+    title: 'الإعدادات', profile: 'الملف الشخصي', displayName: 'الاسم المعروض', primaryCurrency: 'العملة الأساسية',
+    appearance: 'المظهر', accent: 'لون التطبيق', accents: { teal: 'فيروزي', blue: 'أزرق', purple: 'بنفسجي', pink: 'وردي', orange: 'برتقالي' }, language: 'اللغة', theme: 'السمة', system: 'النظام', light: 'فاتح', dark: 'داكن',
+    account: 'الحساب', signedInAs: 'مسجّل الدخول باسم {{email}}', signOut: 'تسجيل الخروج',
+    pendingTitle: 'تغييرات غير متزامنة', pendingBody: '{{count}} تغيير لم يصل إلى السحابة بعد. تبقى بأمان على هذا الجهاز وتُرفع عند تسجيل دخولك هنا مرة أخرى.',
+    localOnly: 'وضع محلي فقط', localOnlyHint: 'مزامنة السحابة غير مُعدّة، لذا تبقى البيانات على هذا الجهاز.',
+    saved: 'تم الحفظ', restartForRtl: 'أعد تشغيل التطبيق لتطبيق اتجاه التخطيط الجديد.',
+  },
+  sync: { localOnly: 'على هذا الجهاز فقط', offline: 'غير متصل', syncing: 'جارٍ المزامنة…', synced: 'متزامن', connecting: 'جارٍ الاتصال…', pending: '{{count}} قيد الانتظار' },
+  dashboard: {
+    greeting: 'مرحبًا، {{name}}', greetingNoName: 'مرحبًا', balances: 'الأرصدة', accounts: 'الحسابات',
+    thisMonth: 'هذا الشهر', personal: 'شخصي', work: 'الشغل', workProfit: 'ربح الشغل', income: 'الدخل', expenses: 'المصاريف', net: 'الصافي', recent: 'آخر العمليات',
+    emptyTitle: 'مرحبًا بك في المحفظة الشخصية', emptyHint: 'ابدأ بإضافة الحسابات التي تحتفظ فيها بأموالك.',
+  },
+  tx: {
+    title: 'العمليات', add: 'إضافة عملية', scope: 'شخصي أم شغل؟', personal: 'شخصي', work: 'شغل', expense: 'مصروف', income: 'دخل', transfer: 'تحويل',
+    amount: 'المبلغ', account: 'الحساب', from: 'من', to: 'إلى', toAmount: 'المبلغ المستلم ({{currency}})',
+    category: 'الفئة', note: 'ملاحظة', date: 'التاريخ', empty: 'لا توجد عمليات بعد', emptyHint: 'اضغط + لتسجيل أول مصروف أو دخل.',
+    deleteTitle: 'حذف هذه العملية؟', deleteBody: 'سيتم تحديث الأرصدة والمجاميع.', noAccounts: 'أضف حسابًا أولًا',
+    noAccountsHint: 'تُسجَّل العمليات على حساب، مثل النقد أو البنك.', noResults: 'لا توجد نتائج مطابقة',
+  },
+  debts: {
+    title: 'الديون', new: 'دين جديد', edit: 'تعديل الدين', owedToMe: 'لي عند الناس', iOwe: 'عليّ للناس', person: 'الشخص',
+    outstanding: 'المتبقي', settled: 'مسدَّد', markSettled: 'تم السداد', reopen: 'إعادة فتح',
+    empty: 'لا توجد ديون هنا', emptyHint: 'اضغط + لتسجيل مبلغ لك عند أحد أو مبلغ عليك لأحد.', deleteTitle: 'حذف هذا الدين؟',
+  },
+  more: { title: 'المزيد' },
+};

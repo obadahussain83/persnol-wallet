@@ -1,0 +1,11 @@
+# Paste into the PowerSync dashboard (Sync Rules). Each user receives only their own rows;
+# the server still enforces ownership with RLS on every upload.
+bucket_definitions:
+  user_data:
+    parameters: SELECT request.user_id() AS user_id
+    data:
+      - SELECT * FROM accounts WHERE user_id = bucket.user_id
+      - SELECT * FROM categories WHERE user_id = bucket.user_id
+      - SELECT * FROM transactions WHERE user_id = bucket.user_id
+      - SELECT * FROM profiles WHERE user_id = bucket.user_id
+      - SELECT * FROM debts WHERE user_id = bucket.user_id

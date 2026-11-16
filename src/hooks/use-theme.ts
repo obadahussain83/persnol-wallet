@@ -1,14 +1,8 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
+import { Accents, Colors, Surface } from '@/constants/theme';
+import { usePreferences } from '@/preferences/preferences-provider';
 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
+/** Color tokens for the user's chosen theme (system / light / dark) and accent color, plus the scheme's surface treatment. */
 export function useTheme() {
-  const scheme = useColorScheme();
-  const theme = scheme === 'dark' ? 'dark' : 'light';
-
-  return Colors[theme];
+  const { scheme, accent } = usePreferences();
+  return { ...Colors[scheme], ...Surface[scheme], primary: Accents[accent][scheme] };
 }
