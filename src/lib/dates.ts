@@ -24,3 +24,18 @@ export function dayRange(from: string, to: string): [string, string] | null {
   if (!a || !b || b < a) return null;
   return [a.toISOString(), new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1).toISOString()];
 }
+
+/** ISO timestamp `days` days before now. */
+export function daysAgoIso(days: number, now = new Date()): string {
+  return new Date(now.getTime() - days * 86_400_000).toISOString();
+}
+
+/** This month from its 1st up to now, and the same stretch of last month (clamped to last month's end). */
+export function monthToDateRanges(now = new Date()): { current: [string, string]; previous: [string, string] } {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  // Same calendar day and clock time last month (not elapsed ms, which drifts across a DST change).
+  const sameDay = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+  const prevEnd = sameDay.getMonth() === prevStart.getMonth() ? sameDay : start; // e.g. March 31 → all of February
+  return { current: [start.toISOString(), now.toISOString()], previous: [prevStart.toISOString(), prevEnd.toISOString()] };
+}

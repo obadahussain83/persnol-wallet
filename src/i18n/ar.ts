@@ -35,6 +35,7 @@ export const ar: Translations = {
     empty: 'لا توجد حسابات بعد', emptyHint: 'أضف حساباتك النقدية والبنكية والمحافظ لتبدأ التتبع.',
     archiveTitle: 'أرشفة هذا الحساب؟', archiveBody: 'سيُخفى من القوائم والمجاميع. يبقى سجله محفوظًا ويمكنك استعادته في أي وقت.',
     currencyLockedHint: 'مقفلة: هذا الحساب لديه معاملات.',
+    goal: 'هدف الادخار', goalDate: 'تاريخ الهدف (YYYY-MM-DD)', goalProgress: '{{pct}}% من الهدف · باقي {{left}}', goalReached: 'وصلت للهدف 🎉', goalBy: 'قبل {{date}}',
     deleteTitle: 'حذف هذا الحساب؟', deleteBodyWithTx: 'سيتم حذف جميع عملياته أيضًا (بما فيها التحويلات). لا يمكن التراجع عن ذلك.',
   },
   categories: {
@@ -60,7 +61,8 @@ export const ar: Translations = {
   },
   sync: { localOnly: 'على هذا الجهاز فقط', offline: 'غير متصل', syncing: 'جارٍ المزامنة…', synced: 'متزامن', connecting: 'جارٍ الاتصال…', pending: '{{count}} قيد الانتظار' },
   dashboard: {
-    combined: 'كل الأرصدة بالـ {{currency}}', combinedHint: 'تقريبي، حسب أسعار الصرف الحالية.',
+    netWorth: 'صافي الثروة بالـ {{currency}}', worthBalances: 'الأرصدة {{amount}}', worthOwed: '+ إلك عند الناس {{amount}}', worthOwe: '− عليك {{amount}}',
+    combinedHint: 'تقريبي، حسب أسعار الصرف الحالية.',
     greeting: 'مرحبًا، {{name}}', greetingNoName: 'مرحبًا', balances: 'الأرصدة', accounts: 'الحسابات',
     thisMonth: 'هذا الشهر', personal: 'شخصي', work: 'الشغل', workProfit: 'ربح الشغل', income: 'الدخل', expenses: 'المصاريف', net: 'الصافي', recent: 'آخر العمليات',
     emptyTitle: 'مرحبًا بك في المحفظة الشخصية', emptyHint: 'ابدأ بإضافة الحسابات التي تحتفظ فيها بأموالك.',
@@ -68,7 +70,7 @@ export const ar: Translations = {
   tx: {
     custom: 'مخصص', fromDate: 'من (YYYY-MM-DD)', toDate: 'إلى (اختياري)', dateHint: 'اترك «إلى» فاضي لاختيار يوم واحد.', invalidRange: 'أدخل تواريخ صحيحة، و«من» قبل «إلى».',
     filters: 'الفلاتر', period: 'الفترة', allTime: 'كل الوقت', thisMonth: 'هذا الشهر', lastMonth: 'الشهر الماضي', thisYear: 'هذه السنة', clearFilters: 'مسح الفلاتر',
-    title: 'العمليات', add: 'إضافة عملية', scope: 'شخصي أم شغل؟', personal: 'شخصي', work: 'شغل', expense: 'مصروف', income: 'دخل', transfer: 'تحويل',
+    quickAdd: 'إضافة سريعة', title: 'العمليات', add: 'إضافة عملية', scope: 'شخصي أم شغل؟', personal: 'شخصي', work: 'شغل', expense: 'مصروف', income: 'دخل', transfer: 'تحويل',
     amount: 'المبلغ', account: 'الحساب', from: 'من', to: 'إلى', toAmount: 'المبلغ المستلم ({{currency}})',
     category: 'الفئة', note: 'ملاحظة', date: 'التاريخ', empty: 'لا توجد عمليات بعد', emptyHint: 'اضغط + لتسجيل أول مصروف أو دخل.',
     deleteTitle: 'حذف هذه العملية؟', deleteBody: 'سيتم تحديث الأرصدة والمجاميع.', noAccounts: 'أضف حسابًا أولًا',
@@ -139,6 +141,13 @@ export const ar: Translations = {
     recordBody: 'ضيف مجموع الفاتورة كدخل على واحد من حساباتك.',
     status: { draft: 'مسودة', sent: 'مُرسلة', paid: 'مدفوعة', cancelled: 'ملغاة' },
     empty: 'لسا ما في اشي هون', emptyHint: 'اعمل فاتورة أو عرض سعر، اطبعه PDF أو ابعته على واتساب.', deleteTitle: 'حذف؟',
+  },
+  insights: {
+    title: 'ملخص الشهر لحد هلأ',
+    spendUp: 'صرفت {{pct}}% أكثر من نفس الفترة بالشهر الماضي.', spendDown: 'صرفت {{pct}}% أقل من نفس الفترة بالشهر الماضي.',
+    categoryUp: 'مصروف {{label}} زاد {{pct}}% عن الشهر الماضي.', topCategory: 'أكثر مصروفك على {{label}} ({{pct}}%).',
+    saved: 'وفّرت {{pct}}% من دخلك لحد هلأ.', overspent: 'صرفت أكثر من دخلك هالشهر.',
+    overBudget: 'تجاوزت الميزانية بـ {{count}} فئات.',
   },
   more: { title: 'المزيد' },
 };

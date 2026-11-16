@@ -13,14 +13,17 @@ import { TransactionItem } from '@/components/transaction-item';
 import { Button, Card, EmptyState, IconBadge, Screen, SectionTitle } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
 import { daysUntil, DUE_SOON_DAYS } from '@/data/cheques';
-import { crossRate, type FxRow, ratesOf } from '@/data/fx';
+import { type FxRow, ratesOf } from '@/data/fx';
 import {
-  ACCOUNT_BALANCES_SQL, type AccountBalance, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
+  ACCOUNT_BALANCES_SQL, type AccountBalance, BUDGET_PROGRESS_SQL, type BudgetProgress, type CategorySpend, EXPENSE_BY_CATEGORY_SQL, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
   TRANSACTIONS_LIST_SQL, type TransactionListRow,
 } from '@/db/queries';
 import { useTheme } from '@/hooks/use-theme';
-import { dayKey, monthRange } from '@/lib/dates';
-import { convert, formatMoney, sumMinor } from '@/lib/money';
+import { categoryLabel } from '@/i18n';
+import { dayKey, monthRange, monthToDateRanges } from '@/lib/dates';
+import { type Insight, monthInsights } from '@/lib/insights';
+import { formatMoney, sumMinor } from '@/lib/money';
+import { netWorth } from '@/lib/net-worth';
 import { useUser } from '@/session/session-provider';
 
 type Totals = { currency: string; scope: 'personal' | 'work'; income_minor: number; expense_minor: number };
@@ -35,6 +38,10 @@ export default function Dashboard() {
   const { data: month } = useQuery<Totals>(SCOPE_TOTALS_SQL, range);
   const { data: recent } = useQuery<TransactionListRow>(TRANSACTIONS_LIST_SQL, [6]);
   const { data: debts } = useQuery<OutstandingDebt>(OUTSTANDING_DEBTS_SQL);
+  const mtd = useMemo(() => monthToDateRanges(), []);
+  const { data: thisSpend } = useQuery<CategorySpend>(EXPENSE_BY_CATEGORY_SQL, mtd.current);
+  const { data: lastSpend } = useQuery<CategorySpend>(EXPENSE_BY_CATEGORY_SQL, mtd.previous);
+  const { data: budgetRows } = useQuery<BudgetProgress>(BUDGET_PROGRESS_SQL, range);
   const { data: fxRows } = useQuery<FxRow>('SELECT id, per_usd, base, fetched_at, manual FROM fx_rates');
   const soonKey = useMemo(() => { const d = new Date(); return dayKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + DUE_SOON_DAYS, 12).toISOString()); }, []);
   const { data: dueCheques } = useQuery<{ id: string; direction: 'incoming' | 'outgoing'; person: string; amount_minor: number; currency: string; due_date: string }>(
@@ -56,10 +63,23 @@ export default function Dashboard() {
   }));
   const primary = profile[0]?.primary_currency ?? 'ILS';
   const rates = ratesOf(fxRows);
-  // Null until every needed rate is known (first launch offline): better no total than a wrong one.
-  const combined = balances.length > 1 && balances.every((b) => crossRate(rates, b.currency, primary))
-    ? sumMinor(balances.map((b) => convert(b.total, b.currency, primary, crossRate(rates, b.currency, primary)!)))
-    : null;
+  // Null until every needed rate is known (first launch offline). Only worth a card when it says more than the heroes.
+  const worth = netWorth(balances, debts, rates, primary);
+  const showWorth = worth && (balances.length > 1 || worth.owedToMe > 0 || worth.iOwe > 0);
+  // Monthly summary, in the primary currency only (personal and work merged per category).
+  const catTotals = (rows: CategorySpend[]) => Object.values(rows.filter((r) => r.currency === primary).reduce<Record<string, { id: string; label: string; total: number }>>(
+    (acc, r) => {
+      const id = r.category_id ?? 'none';
+      acc[id] = { id, label: r.category_id ? categoryLabel({ key: r.category_key, name: r.category_name }) : t('reports.uncategorized'), total: (acc[id]?.total ?? 0) + r.total_minor };
+      return acc;
+    }, {}));
+  const monthPrimary = month.filter((m) => m.currency === primary);
+  const insights = monthInsights({
+    thisCats: catTotals(thisSpend), lastCats: catTotals(lastSpend),
+    income: monthPrimary.reduce((a, m) => a + m.income_minor, 0), expense: monthPrimary.reduce((a, m) => a + m.expense_minor, 0),
+    overBudgets: budgetRows.filter((b) => b.spent_minor > b.amount_minor).length,
+  });
+  const insightText = (i: Insight) => t(`insights.${i.key}`, i);
   // Personal totals ride on the hero of their currency; a card is only needed for work, or a currency with no hero.
   const monthRows = [...personal.filter((p) => !balances.some((b) => b.currency === p.currency)), ...workRows];
 
@@ -79,11 +99,24 @@ export default function Dashboard() {
               );
             })}
           </Reveal>
-          {combined !== null && (
-            <Card testID="combined-total">
-              <ThemedText type="small" themeColor="textSecondary">{t('dashboard.combined', { currency: primary })}</ThemedText>
-              <ThemedText style={styles.statValue}>≈ {money(combined, primary)}</ThemedText>
+          {showWorth && worth && (
+            <Card testID="net-worth">
+              <ThemedText type="small" themeColor="textSecondary">{t('dashboard.netWorth', { currency: primary })}</ThemedText>
+              <ThemedText style={[styles.statValue, { color: worth.net < 0 ? theme.expense : theme.text }]}>≈ {money(worth.net, primary)}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {[
+                  t('dashboard.worthBalances', { amount: money(worth.balances, primary) }),
+                  worth.owedToMe ? t('dashboard.worthOwed', { amount: money(worth.owedToMe, primary) }) : null,
+                  worth.iOwe ? t('dashboard.worthOwe', { amount: money(worth.iOwe, primary) }) : null,
+                ].filter(Boolean).join(' · ')}
+              </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">{t('dashboard.combinedHint')}</ThemedText>
+            </Card>
+          )}
+          {insights.length > 0 && (
+            <Card testID="month-insights">
+              <ThemedText type="smallBold">{t('insights.title')}</ThemedText>
+              {insights.map((i) => <ThemedText key={i.key} type="small" themeColor="textSecondary">• {insightText(i)}</ThemedText>)}
             </Card>
           )}
           <Reveal index={1} style={styles.cta}><Button label={t('tx.add')} icon="plus" onPress={() => router.push('/add')} /></Reveal>

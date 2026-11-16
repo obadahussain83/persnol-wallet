@@ -22,8 +22,8 @@ const data: ExportData = {
     tx({ type: 'transfer', amount_minor: 5000, currency: 'USD', to_amount_minor: 18250, to_currency: 'ILS', to_account_name: 'Bank' }),
   ],
   accounts: [
-    { id: 'a', name: 'Cash', type: 'cash', currency: 'JOD', icon: null, color: null, archived_at: null, balance_minor: 12345 },
-    { id: 'b', name: 'Old', type: 'bank', currency: 'ILS', icon: null, color: null, archived_at: '2026-01-01T00:00:00Z', balance_minor: -500 },
+    { id: 'a', name: 'Cash', type: 'cash', currency: 'JOD', icon: null, color: null, archived_at: null, balance_minor: 12345, goal_minor: null, goal_date: null },
+    { id: 'b', name: 'Old', type: 'bank', currency: 'ILS', icon: null, color: null, archived_at: '2026-01-01T00:00:00Z', balance_minor: -500, goal_minor: null, goal_date: null },
   ],
   debts: [
     { direction: 'owed_to_me', person: 'Ali', amount_minor: 3000, currency: 'ILS', note: null, settled_at: null, created_at: '2026-11-01T12:00:00Z' },

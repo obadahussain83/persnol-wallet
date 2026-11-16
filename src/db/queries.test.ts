@@ -8,7 +8,7 @@ import { ACCOUNT_BALANCES_SQL, OUTSTANDING_DEBTS_SQL, PERIOD_TOTALS_SQL } from '
 function setup() {
   const db = new DatabaseSync(':memory:');
   db.exec(`
-    CREATE TABLE accounts (id TEXT, name TEXT, type TEXT, currency TEXT, icon TEXT, color TEXT, opening_balance_minor INTEGER, archived_at TEXT);
+    CREATE TABLE accounts (id TEXT, name TEXT, type TEXT, currency TEXT, icon TEXT, color TEXT, opening_balance_minor INTEGER, archived_at TEXT, goal_minor INTEGER, goal_date TEXT);
     CREATE TABLE transactions (id TEXT, type TEXT, account_id TEXT, amount_minor INTEGER, currency TEXT,
       to_account_id TEXT, to_amount_minor INTEGER, occurred_at TEXT, deleted_at TEXT);
     CREATE TABLE debts (id TEXT, direction TEXT, amount_minor INTEGER, currency TEXT, settled_at TEXT);

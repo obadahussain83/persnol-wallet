@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { dayKey, parseDay } from '../lib/dates.ts';
 import { CURRENCY_DECIMALS, type CurrencyCode, parseAmount } from '../lib/money.ts';
 import { type Db, DomainError, newId, nowIso } from './db.ts';
 
@@ -16,12 +17,21 @@ export const accountInputSchema = z
     description: z.string().trim().max(500, 'tooLong'),
     color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'invalid'),
     icon: z.string().min(1, 'required'),
+    goal: z.string().trim().default(''), // optional savings goal amount
+    goalDate: z.string().trim().refine((d) => !d || parseDay(d) !== null, 'invalidDate').default(''),
   })
   .superRefine((v, ctx) => {
     try {
       parseAmount(v.openingBalance || '0', v.currency);
     } catch {
       ctx.addIssue({ code: 'custom', path: ['openingBalance'], message: 'invalidAmount' });
+    }
+    if (v.goal) {
+      try {
+        if (parseAmount(v.goal, v.currency) <= 0) ctx.addIssue({ code: 'custom', path: ['goal'], message: 'amountPositive' });
+      } catch {
+        ctx.addIssue({ code: 'custom', path: ['goal'], message: 'invalidAmount' });
+      }
     }
   });
 
@@ -37,6 +47,8 @@ function toRow(input: AccountInput) {
     description: v.description || null,
     color: v.color,
     icon: v.icon,
+    goal: v.goal ? parseAmount(v.goal, v.currency) : null,
+    goalDate: v.goalDate ? dayKey(parseDay(v.goalDate)!.toISOString()) : null,
   };
 }
 
@@ -45,9 +57,9 @@ export async function createAccount(db: Db, userId: string, input: AccountInput)
   const id = await newId(db);
   const now = nowIso();
   await db.execute(
-    `INSERT INTO accounts (id, user_id, name, type, currency, opening_balance_minor, description, color, icon, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, userId, r.name, r.type, r.currency, r.opening, r.description, r.color, r.icon, now, now],
+    `INSERT INTO accounts (id, user_id, name, type, currency, opening_balance_minor, description, color, icon, goal_minor, goal_date, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, userId, r.name, r.type, r.currency, r.opening, r.description, r.color, r.icon, r.goal, r.goalDate, now, now],
   );
   return id;
 }
@@ -62,8 +74,8 @@ export async function updateAccount(db: Db, id: string, input: AccountInput): Pr
   }
   await db.execute(
     `UPDATE accounts SET name = ?, type = ?, currency = ?, opening_balance_minor = ?, description = ?,
-       color = ?, icon = ?, updated_at = ? WHERE id = ?`,
-    [r.name, r.type, r.currency, r.opening, r.description, r.color, r.icon, nowIso(), id],
+       color = ?, icon = ?, goal_minor = ?, goal_date = ?, updated_at = ? WHERE id = ?`,
+    [r.name, r.type, r.currency, r.opening, r.description, r.color, r.icon, r.goal, r.goalDate, nowIso(), id],
   );
 }
 

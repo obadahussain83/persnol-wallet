@@ -150,3 +150,14 @@ test('orderCategoryTree groups children under sorted parents', async () => {
   ];
   assert.deepEqual(orderCategoryTree(rows, (r) => r.n).map((x) => `${x.depth}:${x.row.n}`), ['0:Animals', '1:Cats', '1:Zoo', '0:Bills', '0:Orphan']);
 });
+
+test('accounts: optional savings goal is validated and stored in minor units', async () => {
+  const db = createTestDb();
+  const id = await createAccount(db, U, { ...cash, goal: '1500.5', goalDate: '2027-06-01' });
+  const row = await db.getOptional<{ goal_minor: number; goal_date: string }>('SELECT goal_minor, goal_date FROM accounts WHERE id = ?', [id]);
+  assert.deepEqual({ ...row }, { goal_minor: 1500500, goal_date: '2027-06-01' }); // JOD: 3 decimals
+  await updateAccount(db, id, { ...cash, goal: '', goalDate: '' });
+  assert.deepEqual({ ...(await db.getOptional<object>('SELECT goal_minor, goal_date FROM accounts WHERE id = ?', [id])) }, { goal_minor: null, goal_date: null });
+  await assert.rejects(createAccount(db, U, { ...cash, goal: '0' }));
+  await assert.rejects(createAccount(db, U, { ...cash, goalDate: '2027-02-30' }));
+});

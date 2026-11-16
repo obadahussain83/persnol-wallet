@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { ProgressBar } from '@/components/progress-bar';
 import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { Card, IconBadge } from '@/components/ui/primitives';
@@ -30,6 +31,20 @@ export function AccountCard({ account, onPress }: { account: AccountBalance; onP
         </ThemedText>
         {onPress ? <AppIcon name="chevron-right" size={18} color={theme.textSecondary} /> : null}
       </View>
+      {account.goal_minor ? (
+        <View style={styles.goal}>
+          <ProgressBar ratio={account.balance_minor / account.goal_minor} color={account.color ?? theme.primary} height={6} />
+          <ThemedText type="small" themeColor="textSecondary">
+            {account.balance_minor >= account.goal_minor
+              ? t('accounts.goalReached')
+              : t('accounts.goalProgress', {
+                pct: Math.max(0, Math.floor((account.balance_minor / account.goal_minor) * 100)),
+                left: formatMoney(account.goal_minor - Math.max(0, account.balance_minor), account.currency, i18n.language),
+              })}
+            {account.goal_date ? ` · ${t('accounts.goalBy', { date: account.goal_date })}` : ''}
+          </ThemedText>
+        </View>
+      ) : null}
     </Card>
   );
 }
@@ -37,5 +52,6 @@ export function AccountCard({ account, onPress }: { account: AccountBalance; onP
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   flex: { flex: 1 },
+  goal: { gap: Spacing.one },
   amount: { fontSize: 18, lineHeight: 26, fontVariant: ['tabular-nums'] },
 });

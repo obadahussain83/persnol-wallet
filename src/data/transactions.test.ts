@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ACCOUNT_BALANCES_SQL, PERIOD_TOTALS_SQL } from '../db/queries.ts';
+import { ACCOUNT_BALANCES_SQL, PERIOD_TOTALS_SQL, QUICK_ADD_SQL, type QuickAdd } from '../db/queries.ts';
 import { createAccount, deleteAccount, setAccountArchived } from './accounts.ts';
 import { createCategory } from './categories.ts';
 import { DomainError } from './db.ts';
@@ -91,4 +91,19 @@ test('deleteAccount removes the account and its transactions, including transfer
   assert.equal(await db.getOptional('SELECT 1 AS x FROM accounts WHERE id = ?', [bank]), null);
   assert.equal((await db.getAll('SELECT 1 AS x FROM transactions WHERE deleted_at IS NULL')).length, 0);
   assert.equal((await balances()).Cash, 10000); // transfer into Cash undone
+});
+
+test('quick add suggests repeated transactions, most used first, ignoring one-offs and deleted rows', async () => {
+  const { db, cash, bank, food, salary } = await setup();
+  const add = (accountId: string, categoryId: string, amount: string, note = '', type: 'expense' | 'income' = 'expense') =>
+    createTransaction(db, U, { type, accountId, categoryId, amount, occurredAt: day, note });
+  for (let i = 0; i < 3; i++) await add(cash, food, '10', 'coffee');
+  await add(cash, food, '10', 'tea'); // different note: its own group (only once)
+  await add(bank, salary, '5000', '', 'income');
+  const gone = await add(bank, salary, '5000', '', 'income');
+  await add(bank, salary, '5000', '', 'income');
+  await deleteTransaction(db, gone);
+  await add(cash, food, '99'); // once only
+  const rows = await db.getAll<QuickAdd>(QUICK_ADD_SQL, ['2026-01-01T00:00:00.000Z']);
+  assert.deepEqual(rows.map((r) => [r.notes, r.amount_minor, r.uses]), [['coffee', 1000, 3], [null, 500000, 2]]);
 });

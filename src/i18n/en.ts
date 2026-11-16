@@ -33,6 +33,7 @@ export const en = {
     empty: 'No accounts yet', emptyHint: 'Add your cash, bank and wallet accounts to start tracking.',
     archiveTitle: 'Archive this account?', archiveBody: 'It will be hidden from lists and totals. Its history is kept and you can restore it any time.',
     currencyLockedHint: 'Locked: this account already has transactions.',
+    goal: 'Savings goal', goalDate: 'Goal date (YYYY-MM-DD)', goalProgress: '{{pct}}% of goal · {{left}} to go', goalReached: 'Goal reached 🎉', goalBy: 'by {{date}}',
     deleteTitle: 'Delete this account?', deleteBodyWithTx: 'All its transactions (including transfers) will be deleted too. This can’t be undone.',
   },
   categories: {
@@ -60,13 +61,14 @@ export const en = {
   dashboard: {
     greeting: 'Hello, {{name}}', greetingNoName: 'Hello', balances: 'Balances', accounts: 'Accounts',
     thisMonth: 'This month', personal: 'Personal', work: 'Work', workProfit: 'Work profit', income: 'Income', expenses: 'Expenses', net: 'Net', recent: 'Recent transactions',
-    combined: 'All balances in {{currency}}', combinedHint: 'Approximate, at current exchange rates.',
+    netWorth: 'Net worth in {{currency}}', worthBalances: 'balances {{amount}}', worthOwed: '+ owed to you {{amount}}', worthOwe: '− you owe {{amount}}',
+    combinedHint: 'Approximate, at current exchange rates.',
     emptyTitle: 'Welcome to Personal Wallet', emptyHint: 'Start by adding the accounts you hold money in.',
   },
   tx: {
     custom: 'Custom', fromDate: 'From (YYYY-MM-DD)', toDate: 'To (optional)', dateHint: 'Leave “To” empty for a single day.', invalidRange: 'Enter valid dates, with “From” before “To”.',
     filters: 'Filters', period: 'Period', allTime: 'All time', thisMonth: 'This month', lastMonth: 'Last month', thisYear: 'This year', clearFilters: 'Clear filters',
-    title: 'Transactions', add: 'Add transaction', scope: 'Personal or work?', personal: 'Personal', work: 'Work', expense: 'Expense', income: 'Income', transfer: 'Transfer',
+    quickAdd: 'Quick add', title: 'Transactions', add: 'Add transaction', scope: 'Personal or work?', personal: 'Personal', work: 'Work', expense: 'Expense', income: 'Income', transfer: 'Transfer',
     amount: 'Amount', account: 'Account', from: 'From', to: 'To', toAmount: 'Amount received ({{currency}})',
     category: 'Category', note: 'Note', date: 'Date', empty: 'No transactions yet', emptyHint: 'Tap + to record your first expense or income.',
     deleteTitle: 'Delete this transaction?', deleteBody: 'Balances and totals will be updated.', noAccounts: 'Add an account first',
@@ -88,6 +90,13 @@ export const en = {
     received: 'Amount received', receivedCurrency: 'Received currency',
   },
   more: { title: 'More' },
+  insights: {
+    title: 'This month so far',
+    spendUp: 'You’ve spent {{pct}}% more than by this time last month.', spendDown: 'You’ve spent {{pct}}% less than by this time last month.',
+    categoryUp: '{{label}} is up {{pct}}% on last month.', topCategory: 'Most of your spending is on {{label}} ({{pct}}%).',
+    saved: 'You’ve kept {{pct}}% of your income so far.', overspent: 'You’ve spent more than you earned this month.',
+    overBudget: 'Over budget in {{count}} categories.',
+  },
   invoices: {
     title: 'Invoices & quotes', invoices: 'Invoices', quotes: 'Quotes', invoice: 'Invoice', quote: 'Quote',
     new: 'New invoice', newQuote: 'New quote', edit: 'Edit invoice', client: 'Client', issueDate: 'Date (YYYY-MM-DD)', dueDate: 'Due date',

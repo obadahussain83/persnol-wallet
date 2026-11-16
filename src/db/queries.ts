@@ -2,7 +2,7 @@
 // never stored. Transfers move money between accounts and are excluded from income/expense.
 
 const accountBalancesSql = (where: string) => `
-SELECT a.id, a.name, a.type, a.currency, a.icon, a.color, a.archived_at,
+SELECT a.id, a.name, a.type, a.currency, a.icon, a.color, a.archived_at, a.goal_minor, a.goal_date,
   a.opening_balance_minor + COALESCE(SUM(
     CASE
       WHEN t.type = 'income'   AND t.account_id    = a.id THEN  t.amount_minor
@@ -19,7 +19,7 @@ ORDER BY a.archived_at IS NOT NULL, a.name`;
 
 export type AccountBalance = {
   id: string; name: string; type: string; currency: string; icon: string | null; color: string | null;
-  archived_at: string | null; balance_minor: number;
+  archived_at: string | null; balance_minor: number; goal_minor: number | null; goal_date: string | null;
 };
 
 /** Active accounts with balances. */
@@ -122,3 +122,24 @@ ORDER BY total_minor DESC`;
 export const FLOW_SINCE_SQL = `
 SELECT type, currency, COALESCE(scope, 'personal') AS scope, amount_minor, occurred_at FROM transactions
 WHERE deleted_at IS NULL AND type IN ('income', 'expense') AND occurred_at >= ?`;
+
+export type QuickAdd = {
+  type: 'expense' | 'income'; account_id: string; category_id: string; amount_minor: number; currency: string; notes: string | null;
+  scope: 'personal' | 'work'; uses: number; category_key: string | null; category_name: string | null; category_icon: string | null; category_color: string | null;
+};
+
+/**
+ * Income/expenses repeated at least twice since a date (same account, category, amount, note and scope), most used first:
+ * one tap on the add screen refills them. Params: [sinceIso].
+ */
+export const QUICK_ADD_SQL = `
+SELECT t.type, t.account_id, t.category_id, t.amount_minor, t.currency, t.notes, COALESCE(t.scope, 'personal') AS scope, COUNT(*) AS uses,
+  c.key AS category_key, c.name AS category_name, c.icon AS category_icon, c.color AS category_color
+FROM transactions t
+JOIN categories c ON c.id = t.category_id AND c.archived_at IS NULL
+JOIN accounts a ON a.id = t.account_id AND a.archived_at IS NULL
+WHERE t.deleted_at IS NULL AND t.type IN ('income', 'expense') AND t.occurred_at >= ?
+GROUP BY t.type, t.account_id, t.category_id, t.amount_minor, t.notes, COALESCE(t.scope, 'personal')
+HAVING COUNT(*) >= 2
+ORDER BY uses DESC, MAX(t.occurred_at) DESC
+LIMIT 6`;

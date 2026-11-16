@@ -1,7 +1,7 @@
 import { useQuery } from '@powersync/react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,10 +11,11 @@ import { Radius, Spacing } from '@/constants/theme';
 import { orderCategoryTree } from '@/data/categories';
 import { createRecurring, generateDue } from '@/data/recurring';
 import { createTransaction, createTransfer } from '@/data/transactions';
-import { ACCOUNT_BALANCES_SQL, type AccountBalance } from '@/db/queries';
+import { ACCOUNT_BALANCES_SQL, type AccountBalance, QUICK_ADD_SQL, type QuickAdd } from '@/db/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
-import { dayKey } from '@/lib/dates';
+import { dayKey, daysAgoIso } from '@/lib/dates';
+import { formatMoney, toDecimalString } from '@/lib/money';
 import { goBack } from '@/lib/navigation';
 import { useUser } from '@/session/session-provider';
 
@@ -31,7 +32,7 @@ export default function AddTransaction() {
 }
 
 function AddForm() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const { db, userId } = useUser();
   // amount/note can be prefilled, e.g. when a cleared cheque is recorded.
@@ -58,6 +59,8 @@ function AddForm() {
      FROM categories c WHERE c.kind = ? AND c.archived_at IS NULL`,
     [kind === 'income' ? 'income' : 'expense'],
   );
+  const quickSince = useMemo(() => daysAgoIso(90), []);
+  const { data: quick } = useQuery<QuickAdd>(QUICK_ADD_SQL, [quickSince]);
   const { data: last } = useQuery<{ account_id: string }>(
     'SELECT account_id FROM transactions WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 1');
 
@@ -105,6 +108,16 @@ function AddForm() {
       <ThemedText type="small" style={{ color: selected ? theme.primaryText : theme.text }} numberOfLines={1}>{label}</ThemedText>
     </View>
   );
+  // Refill the form from a repeated transaction; the user still reviews and taps Save.
+  const applyQuick = (q: QuickAdd) => {
+    setKind(q.type);
+    setAmount(toDecimalString(q.amount_minor, q.currency));
+    setAccountId(q.account_id);
+    setCategoryId(q.category_id);
+    setScope(q.scope);
+    setNote(q.notes ?? '');
+    setError(null);
+  };
   const nameOf = (id: string) => accounts.find((a) => a.id === id)?.name ?? '';
   const amountColor = kind === 'expense' ? theme.expense : kind === 'income' ? theme.income : theme.text;
 
@@ -115,6 +128,22 @@ function AddForm() {
         onChange={(k) => { setKind(k); setCategoryId(''); setError(null); }}
         options={[{ value: 'expense', label: t('tx.expense') }, { value: 'income', label: t('tx.income') }, { value: 'transfer', label: t('tx.transfer') }]}
       />
+      {quick.length > 0 && (
+        <View style={styles.quickWrap} accessibilityLabel={t('tx.quickAdd')}>
+          {quick.map((q) => (
+            <Pressable key={`${q.account_id}|${q.category_id}|${q.amount_minor}|${q.notes}|${q.scope}`} accessibilityRole="button" onPress={() => applyQuick(q)}
+              style={[styles.quick, { backgroundColor: theme.backgroundSelected, borderColor: theme.border }]}>
+              <IconBadge icon={q.category_icon ?? 'tag'} color={q.category_color ?? theme.primary} size={24} />
+              <ThemedText type="small" numberOfLines={1} style={styles.quickText}>
+                {q.notes || categoryLabel({ key: q.category_key, name: q.category_name })}
+              </ThemedText>
+              <ThemedText type="smallBold" style={{ color: q.type === 'income' ? theme.income : theme.expense }}>
+                {formatMoney(q.amount_minor, q.currency, i18n.language)}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
+      )}
 
       <View style={[styles.amountBox, {
         backgroundColor: theme.backgroundElement,
@@ -187,6 +216,9 @@ function AddForm() {
 }
 
 const styles = StyleSheet.create({
+  quickWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  quick: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, paddingHorizontal: Spacing.two, minHeight: 40, borderRadius: 20, borderWidth: 1, maxWidth: 260 },
+  quickText: { flexShrink: 1 },
   amountBox: { borderWidth: 1, borderRadius: Radius.lg, paddingVertical: Spacing.three, alignItems: 'center', gap: Spacing.one },
   amount: {
     width: '100%',

@@ -14,6 +14,8 @@ const accounts = new Table(
     color: column.text,
     icon: column.text,
     archived_at: column.text,
+    goal_minor: column.integer, // optional savings goal, in `currency`
+    goal_date: column.text, // optional YYYY-MM-DD target date
     created_at: column.text,
     updated_at: column.text,
     version: column.integer,

@@ -37,7 +37,7 @@ export default function AccountForm() {
 
   const form = useForm({
     resolver: zodResolver(accountInputSchema),
-    defaultValues: { name: '', type: 'cash' as const, currency: 'ILS' as const, openingBalance: '0', description: '', color: SWATCHES[0], icon: 'wallet' },
+    defaultValues: { name: '', type: 'cash' as const, currency: 'ILS' as const, openingBalance: '0', description: '', color: SWATCHES[0], icon: 'wallet', goal: '', goalDate: '' },
   });
 
   // Fill the form once per loaded record (live query updates after our own save must not reset it).
@@ -54,6 +54,7 @@ export default function AccountForm() {
       name: row.name ?? '', type: (row.type ?? 'cash') as (typeof ACCOUNT_TYPES)[number], currency,
       openingBalance: toDecimalString(row.opening_balance_minor ?? 0, currency), description: row.description ?? '',
       color: row.color ?? SWATCHES[0], icon: row.icon ?? 'wallet',
+      goal: row.goal_minor ? toDecimalString(row.goal_minor, currency) : '', goalDate: row.goal_date ?? '',
     });
     accountHasTransactions(db, row.id).then(setLocked);
   }, [row, profile, isNew, db, form]);
@@ -107,6 +108,8 @@ export default function AccountForm() {
       <FormTextField control={control} name="openingBalance" label={t('accounts.openingBalance')} keyboardType="decimal-pad" inputMode="decimal" />
       <Button variant="ghost" icon="chevron-down" label={showMore ? t('common.fewerOptions') : t('common.moreOptions')} onPress={() => setShowMore((v) => !v)} />
       {showMore && <>
+      <FormTextField control={control} name="goal" label={`${t('accounts.goal')} (${t('common.optional')})`} keyboardType="decimal-pad" inputMode="decimal" />
+      <FormTextField control={control} name="goalDate" label={`${t('accounts.goalDate')} (${t('common.optional')})`} placeholder="2027-06-01" inputMode="numeric" />
       <FormTextField control={control} name="description" label={`${t('accounts.description')} (${t('common.optional')})`} multiline maxLength={500} />
       <Controller control={control} name="color" render={({ field }) => (
         <ChoiceGrid label={t('accounts.color')} choices={SWATCHES} value={field.value} onChange={field.onChange}
