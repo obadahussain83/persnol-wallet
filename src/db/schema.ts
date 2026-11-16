@@ -71,6 +71,7 @@ const profiles = new Table({
   user_id: column.text,
   display_name: column.text,
   primary_currency: column.text,
+  mode: column.text, // personal | business; null until chosen after signup
   created_at: column.text,
   updated_at: column.text,
   version: column.integer,

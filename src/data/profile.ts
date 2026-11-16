@@ -20,6 +20,15 @@ export async function updateProfile(db: Db, userId: string, input: ProfileInput)
   ]);
 }
 
+export const MODES = ['personal', 'business'] as const;
+export type Mode = (typeof MODES)[number];
+
+/** Switching mode only shows or hides features; no data is changed. */
+export async function setProfileMode(db: Db, userId: string, mode: Mode): Promise<void> {
+  if (!MODES.includes(mode)) throw new Error(`invalid mode: ${mode}`);
+  await db.execute('UPDATE profiles SET mode = ?, updated_at = ? WHERE id = ?', [mode, nowIso(), userId]);
+}
+
 /**
  * Local-only (no cloud configured) mode has no signup trigger, so create the same starter data
  * locally. Never call this when syncing: profiles are server-created and inserts would be rejected.

@@ -12,6 +12,7 @@ import { orderCategoryTree } from '@/data/categories';
 import { createRecurring, generateDue } from '@/data/recurring';
 import { createTransaction, createTransfer } from '@/data/transactions';
 import { ACCOUNT_BALANCES_SQL, type AccountBalance, QUICK_ADD_SQL, type QuickAdd } from '@/db/queries';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
 import { dayKey, daysAgoIso } from '@/lib/dates';
@@ -45,6 +46,7 @@ function AddForm() {
   const [categoryId, setCategoryId] = useState('');
   const [when, setWhen] = useState<'today' | 'yesterday'>('today');
   const [scope, setScope] = useState<Scope>('personal');
+  const { isBusiness } = useMode(); // personal mode: everything is personal, no scope choice
   const [note, setNote] = useState(params.note ?? '');
   const [repeat, setRepeat] = useState<Repeat>('none');
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +116,7 @@ function AddForm() {
     setAmount(toDecimalString(q.amount_minor, q.currency));
     setAccountId(q.account_id);
     setCategoryId(q.category_id);
-    setScope(q.scope);
+    setScope(isBusiness ? q.scope : 'personal');
     setNote(q.notes ?? '');
     setError(null);
   };
@@ -196,7 +198,7 @@ function AddForm() {
         />
       )}
 
-      {kind !== 'transfer' && (
+      {kind !== 'transfer' && isBusiness && (
         <Segmented<Scope> label={t('tx.scope')} value={scope} onChange={setScope}
           options={[{ value: 'personal', label: t('tx.personal') }, { value: 'work', label: t('tx.work') }]} />
       )}

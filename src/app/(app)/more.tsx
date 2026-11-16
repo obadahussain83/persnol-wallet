@@ -6,15 +6,16 @@ import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { Card, Screen } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 
 // Mobile overflow menu.
-const ITEMS: { href: Href; icon: string; label: string }[] = [
+const ITEMS: { href: Href; icon: string; label: string; business?: boolean }[] = [
   { href: '/reports', icon: 'chart-column', label: 'nav.reports' },
   { href: '/budgets', icon: 'target', label: 'nav.budgets' },
   { href: '/recurring', icon: 'repeat', label: 'nav.recurring' },
-  { href: '/contacts', icon: 'user', label: 'nav.contacts' },
-  { href: '/invoices', icon: 'receipt', label: 'nav.invoices' },
+  { href: '/contacts', icon: 'user', label: 'nav.contacts', business: true },
+  { href: '/invoices', icon: 'receipt', label: 'nav.invoices', business: true },
   { href: '/cheques', icon: 'receipt', label: 'nav.cheques' },
   { href: '/debts', icon: 'coins', label: 'nav.debts' },
   { href: '/categories', icon: 'tags', label: 'nav.categories' },
@@ -24,9 +25,10 @@ const ITEMS: { href: Href; icon: string; label: string }[] = [
 export default function More() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { isBusiness } = useMode();
   return (
     <Screen title={t('more.title')}>
-      {ITEMS.map((i) => (
+      {ITEMS.filter((i) => isBusiness || !i.business).map((i) => (
         <Card key={i.label} onPress={() => router.push(i.href)}>
           <View style={styles.row}>
             <AppIcon name={i.icon} color={theme.primary} />

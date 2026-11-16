@@ -91,6 +91,12 @@ export const en = {
     received: 'Amount received', receivedCurrency: 'Received currency',
   },
   more: { title: 'More' },
+  mode: {
+    title: 'How you use the app', question: 'How will you use the app?', hint: 'We’ll show the tools that fit. You can change this any time.',
+    personal: 'Personal only', personalHint: 'Your own money: accounts, spending, budgets, debts and goals.',
+    business: 'Personal + business', businessHint: 'Everything personal, plus work vs personal, profit & loss, clients and invoices.',
+    later: 'You can switch later in Settings.', nothingDeleted: 'Switching only shows or hides tools. Nothing is deleted.',
+  },
   insights: {
     title: 'This month so far',
     spendUp: 'You’ve spent {{pct}}% more than by this time last month.', spendDown: 'You’ve spent {{pct}}% less than by this time last month.',

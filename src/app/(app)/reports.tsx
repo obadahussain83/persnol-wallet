@@ -9,6 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Card, EmptyState, IconBadge, Screen, SectionTitle, Segmented } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
 import { type CategorySpend, EXPENSE_BY_CATEGORY_SQL, FLOW_SINCE_SQL, SCOPE_TOTALS_SQL } from '@/db/queries';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
 import { monthRange } from '@/lib/dates';
@@ -33,6 +34,7 @@ export default function Reports() {
   const [period, setPeriod] = useState<Period>('month');
   const [picked, setPicked] = useState<string | null>(null);
   const [scope, setScope] = useState<Scope>('all');
+  const { isBusiness } = useMode();
   const now = useMemo(() => new Date(), []);
   const range = useMemo(() => periodRange(period, now), [period, now]);
   const since = useMemo(() => flowStart(TREND_MONTHS, now), [now]);
@@ -75,8 +77,10 @@ export default function Reports() {
     <Screen title={t('reports.title')}>
       <Segmented<Period> value={period} onChange={setPeriod}
         options={[{ value: 'month', label: t('tx.thisMonth') }, { value: 'lastMonth', label: t('tx.lastMonth') }, { value: 'year', label: t('tx.thisYear') }]} />
-      <Segmented<Scope> value={scope} onChange={setScope}
-        options={[{ value: 'all', label: t('common.all') }, { value: 'personal', label: t('tx.personal') }, { value: 'work', label: t('tx.work') }]} />
+      {isBusiness && (
+        <Segmented<Scope> value={scope} onChange={setScope}
+          options={[{ value: 'all', label: t('common.all') }, { value: 'personal', label: t('tx.personal') }, { value: 'work', label: t('tx.work') }]} />
+      )}
       {currencies.length > 1 && (
         <Segmented value={currency} onChange={setPicked} options={currencies.map((c) => ({ value: c, label: c }))} />
       )}

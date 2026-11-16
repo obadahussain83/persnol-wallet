@@ -11,6 +11,7 @@ import { Button, Card, ChoiceGrid, EmptyState, IconButton, Screen, SectionTitle,
 import { Spacing } from '@/constants/theme';
 import { deleteTransaction } from '@/data/transactions';
 import { TRANSACTIONS_LIST_SQL, type TransactionListRow } from '@/db/queries';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
 import { dayKey, dayRange, monthRange } from '@/lib/dates';
@@ -36,6 +37,7 @@ export default function Transactions() {
   const { db } = useUser();
   const [q, setQ] = useState('');
   const [scope, setScope] = useState<'all' | 'personal' | 'work'>('all');
+  const { isBusiness } = useMode();
   const [kind, setKind] = useState<Kind>('all');
   const [period, setPeriod] = useState<Period>('all');
   const [accountId, setAccountId] = useState(ALL);
@@ -115,8 +117,10 @@ export default function Transactions() {
                 hint={t('tx.dateHint')} error={fromDay.trim() && !customRange ? t('tx.invalidRange') : undefined} />
               <TextField label={t('tx.toDate')} value={toDay} onChangeText={setToDay} placeholder="2026-11-30" inputMode="numeric" />
             </>}
-            <Segmented label={t('tx.scope')} value={scope} onChange={setScope}
-              options={[{ value: 'all', label: allLabel }, { value: 'personal', label: t('tx.personal') }, { value: 'work', label: t('tx.work') }]} />
+            {isBusiness && (
+              <Segmented label={t('tx.scope')} value={scope} onChange={setScope}
+                options={[{ value: 'all', label: allLabel }, { value: 'personal', label: t('tx.personal') }, { value: 'work', label: t('tx.work') }]} />
+            )}
             <ChoiceGrid label={t('tx.account')} choices={[ALL, ...accountNames.keys()]} value={accountId} onChange={setAccountId}
               labelOf={(id) => accountNames.get(id) ?? allLabel} render={(id, sel) => chip(accountNames.get(id) ?? allLabel, sel)} />
             {categoryNames.size > 0 && (

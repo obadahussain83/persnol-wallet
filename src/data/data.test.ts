@@ -9,7 +9,7 @@ import { createCategory, deleteCategory, setCategoryArchived, updateCategory } f
 import { DomainError } from './db.ts';
 import { createDebt, deleteDebt, setDebtSettled, updateDebt, type DebtInput } from './debts.ts';
 import { DEFAULT_CATEGORIES } from './default-categories.ts';
-import { seedLocalOnlyUser, updateProfile } from './profile.ts';
+import { seedLocalOnlyUser, setProfileMode, updateProfile } from './profile.ts';
 import { createTestDb } from './testing.ts';
 
 const U = 'user-1';
@@ -160,4 +160,16 @@ test('accounts: optional savings goal is validated and stored in minor units', a
   assert.deepEqual({ ...(await db.getOptional<object>('SELECT goal_minor, goal_date FROM accounts WHERE id = ?', [id])) }, { goal_minor: null, goal_date: null });
   await assert.rejects(createAccount(db, U, { ...cash, goal: '0' }));
   await assert.rejects(createAccount(db, U, { ...cash, goalDate: '2027-02-30' }));
+});
+
+test('profile mode starts unset for a new user and can be switched without touching data', async () => {
+  const db = createTestDb();
+  await seedLocalOnlyUser(db, U);
+  const mode = async () => (await db.getOptional<{ mode: string | null }>('SELECT mode FROM profiles WHERE id = ?', [U]))!.mode;
+  assert.equal(await mode(), null);
+  await setProfileMode(db, U, 'personal');
+  assert.equal(await mode(), 'personal');
+  await setProfileMode(db, U, 'business');
+  assert.equal(await mode(), 'business');
+  await assert.rejects(setProfileMode(db, U, 'other' as 'personal'));
 });

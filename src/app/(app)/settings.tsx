@@ -14,7 +14,8 @@ import { AppIcon } from '@/components/ui/app-icon';
 import { Button, Card, ChoiceGrid, Screen, SectionTitle, Segmented } from '@/components/ui/primitives';
 import { type Accent, Accents } from '@/constants/theme';
 import { CURRENCIES } from '@/data/accounts';
-import { profileInputSchema, updateProfile } from '@/data/profile';
+import { type Mode, profileInputSchema, setProfileMode, updateProfile } from '@/data/profile';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel, type Language } from '@/i18n';
 import { exportToExcel } from '@/lib/export';
@@ -31,6 +32,7 @@ export default function Settings() {
   const { data: profile } = useQuery<{ display_name: string | null; primary_currency: string }>(
     'SELECT display_name, primary_currency FROM profiles WHERE id = ?', [userId]);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const { mode } = useMode();
 
   const form = useForm({ resolver: zodResolver(profileInputSchema), defaultValues: { displayName: '', primaryCurrency: 'ILS' as (typeof CURRENCIES)[number] } });
   const loaded = useRef(false);
@@ -99,6 +101,14 @@ export default function Settings() {
               {selected ? <AppIcon name="check" size={20} color={theme.primaryText} /> : null}
             </View>
           )} />
+      </Card>
+
+      <SectionTitle>{t('mode.title')}</SectionTitle>
+      <Card>
+        <Segmented<Mode> value={mode ?? 'business'} onChange={(m) => setProfileMode(db, userId, m)}
+          options={[{ value: 'personal', label: t('mode.personal') }, { value: 'business', label: t('mode.business') }]} />
+        <ThemedText type="small" themeColor="textSecondary">{t(mode === 'personal' ? 'mode.personalHint' : 'mode.businessHint')}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">{t('mode.nothingDeleted')}</ThemedText>
       </Card>
 
       <SectionTitle>{t('fx.title')}</SectionTitle>

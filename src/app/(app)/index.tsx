@@ -19,6 +19,7 @@ import {
   ACCOUNT_BALANCES_SQL, type AccountBalance, BUDGET_PROGRESS_SQL, FLOW_SINCE_SQL, type BudgetProgress, type CategorySpend, EXPENSE_BY_CATEGORY_SQL, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
   TRANSACTIONS_LIST_SQL, type TransactionListRow,
 } from '@/db/queries';
+import { useMode } from '@/hooks/use-mode';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
 import { dayKey, monthRange, monthToDateRanges } from '@/lib/dates';
@@ -57,7 +58,9 @@ export default function Dashboard() {
   const money = (minor: number, currency: string) => formatMoney(minor, currency, i18n.language);
   const name = profile[0]?.display_name;
   const personal: Totals[] = month.filter((m) => m.scope === 'personal');
-  const workRows = month.filter((m) => m.scope === 'work'); // shown only once there is work activity this month
+  const { isBusiness } = useMode();
+  // Work cards: business mode only, and only once there is work activity this month.
+  const workRows = isBusiness ? month.filter((m) => m.scope === 'work') : [];
   // Always shown: with nothing outstanding, both directions read zero in the primary currency.
   const debtRows: OutstandingDebt[] = debts.length ? debts : (['owed_to_me', 'i_owe'] as const).map((direction) => (
     { direction, currency: profile[0]?.primary_currency ?? 'ILS', amount_minor: 0 }));

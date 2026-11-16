@@ -9,12 +9,15 @@ import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { PressableScale } from '@/components/ui/motion';
 import { DesktopBreakpoint, Radius, Spacing } from '@/constants/theme';
+import { ModeChooser } from '@/components/mode-chooser';
 import { useFxRefresh } from '@/hooks/use-fx-refresh';
+import { useMode } from '@/hooks/use-mode';
 import { useRecurringGenerator } from '@/hooks/use-recurring-generator';
 import { useTheme } from '@/hooks/use-theme';
 
 type Href = '/' | '/transactions' | '/add' | '/accounts' | '/debts' | '/categories' | '/settings' | '/more' | '/budgets' | '/reports' | '/recurring' | '/cheques' | '/contacts' | '/invoices';
-type NavItem = { name: string; href: Href; icon: string; label: string; mobileLabel?: string; desktop: boolean; mobile: boolean; primary?: boolean; activeFor?: string[] };
+// business: hidden in personal mode (the route still exists; only the entry point is hidden).
+type NavItem = { name: string; href: Href; icon: string; label: string; mobileLabel?: string; desktop: boolean; mobile: boolean; primary?: boolean; activeFor?: string[]; business?: boolean };
 
 const NAV: Record<string, NavItem> = {
   add: { name: 'add', href: '/add', icon: 'plus', label: 'tx.add', mobileLabel: 'nav.add', desktop: true, mobile: true, primary: true },
@@ -26,8 +29,8 @@ const NAV: Record<string, NavItem> = {
   reports: { name: 'reports', href: '/reports', icon: 'chart-column', label: 'nav.reports', desktop: true, mobile: false },
   budgets: { name: 'budgets', href: '/budgets', icon: 'target', label: 'nav.budgets', desktop: true, mobile: false },
   recurring: { name: 'recurring', href: '/recurring', icon: 'repeat', label: 'nav.recurring', desktop: true, mobile: false },
-  invoices: { name: 'invoices', href: '/invoices', icon: 'receipt', label: 'nav.invoices', desktop: true, mobile: false },
-  contacts: { name: 'contacts', href: '/contacts', icon: 'user', label: 'nav.contacts', desktop: true, mobile: false },
+  invoices: { name: 'invoices', href: '/invoices', icon: 'receipt', label: 'nav.invoices', desktop: true, mobile: false, business: true },
+  contacts: { name: 'contacts', href: '/contacts', icon: 'user', label: 'nav.contacts', desktop: true, mobile: false, business: true },
   cheques: { name: 'cheques', href: '/cheques', icon: 'receipt', label: 'nav.cheques', desktop: true, mobile: false },
   debts: { name: 'debts', href: '/debts', icon: 'coins', label: 'nav.debts', desktop: true, mobile: false },
   more: { name: 'more', href: '/more', icon: 'ellipsis', label: 'nav.more', desktop: false, mobile: true, activeFor: ['/reports', '/budgets', '/recurring', '/cheques', '/contacts', '/invoices', '/debts', '/categories', '/settings'] },
@@ -43,15 +46,19 @@ export default function AppLayout() {
   const { t } = useTranslation();
   useRecurringGenerator();
   useFxRefresh();
+  const { mode, loaded, isBusiness } = useMode();
 
   const triggers = (wide ? DESKTOP_ORDER : MOBILE_ORDER).map((key) => {
     const item = NAV[key];
     return (
       <TabTrigger key={item.name} name={item.name} href={item.href} asChild>
-        <NavButton item={item} wide={wide} hidden={wide ? !item.desktop : !item.mobile} />
+        <NavButton item={item} wide={wide} hidden={(wide ? !item.desktop : !item.mobile) || (!!item.business && !isBusiness)} />
       </TabTrigger>
     );
   });
+
+  // Asked once, after the profile has synced down: personal only, or personal + business.
+  if (loaded && mode === null) return <ModeChooser />;
 
   return (
     <Tabs style={[styles.flex, { flexDirection: wide ? 'row' : 'column', backgroundColor: theme.background }]}>
