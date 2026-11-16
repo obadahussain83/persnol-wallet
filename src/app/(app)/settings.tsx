@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@powersync/react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { SyncStatus } from '@/components/sync-status';
@@ -15,7 +15,8 @@ import { type Accent, Accents } from '@/constants/theme';
 import { CURRENCIES } from '@/data/accounts';
 import { profileInputSchema, updateProfile } from '@/data/profile';
 import { useTheme } from '@/hooks/use-theme';
-import type { Language } from '@/i18n';
+import { categoryLabel, type Language } from '@/i18n';
+import { exportToExcel } from '@/lib/export';
 import { type ThemePref, usePreferences } from '@/preferences/preferences-provider';
 import { useSession, useUser } from '@/session/session-provider';
 
@@ -51,6 +52,21 @@ export default function Settings() {
     if (prefs.setLanguage(l)) await confirm({ title: t('settings.restartForRtl'), confirmLabel: 'OK', cancelLabel: null });
   };
 
+  const [exporting, setExporting] = useState(false);
+  const [exportMessage, setExportMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const doExport = async () => {
+    setExporting(true);
+    setExportMessage(null);
+    try {
+      const file = await exportToExcel(db, t, categoryLabel, prefs.isRTL);
+      setExportMessage({ text: t('export.exported', { file }), ok: true });
+    } catch (e) {
+      setExportMessage({ text: errorMessage(e), ok: false });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const doSignOut = async () => {
     const count = await pendingUploads();
     if (count > 0 && !(await confirm({ title: t('settings.pendingTitle'), body: t('settings.pendingBody', { count }), confirmLabel: t('settings.signOut'), destructive: true }))) return;
@@ -83,6 +99,22 @@ export default function Settings() {
             </View>
           )} />
       </Card>
+
+      {/* shortcut: web only (browser download); native needs expo-file-system + expo-sharing and a new dev build. */}
+      {Platform.OS === 'web' ? (
+        <>
+          <SectionTitle>{t('export.title')}</SectionTitle>
+          <Card>
+            <ThemedText type="small" themeColor="textSecondary">{t('export.hint')}</ThemedText>
+            <Button variant="secondary" icon="download" label={t('export.button')} onPress={doExport} loading={exporting} testID="export-excel" />
+            {exportMessage ? (
+              <ThemedText type="small" style={{ color: exportMessage.ok ? theme.income : theme.danger }} accessibilityLiveRegion="polite">
+                {exportMessage.text}
+              </ThemedText>
+            ) : null}
+          </Card>
+        </>
+      ) : null}
 
       <SectionTitle>{t('settings.account')}</SectionTitle>
       <Card>

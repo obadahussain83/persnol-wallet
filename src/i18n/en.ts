@@ -69,6 +69,11 @@ export const en = {
     outstanding: 'Outstanding', settled: 'Settled', markSettled: 'Mark as settled', reopen: 'Reopen',
     empty: 'No debts here', emptyHint: 'Tap + to record money someone owes you or money you owe.', deleteTitle: 'Delete this debt?',
   },
+  export: {
+    title: 'Your data', button: 'Export to Excel', hint: 'Saves all your transactions, accounts and debts in one Excel file.',
+    exported: 'Exported {{file}}', type: 'Type', scope: 'Personal / work', balance: 'Balance', status: 'Status',
+    received: 'Amount received', receivedCurrency: 'Received currency',
+  },
   more: { title: 'More' },
 };
 export type Translations = typeof en;

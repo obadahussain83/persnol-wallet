@@ -48,10 +48,11 @@ function Routes() {
 
   const stack = (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!!session}>
+      {/* Explicit target: the default fallback lands web on the bare `/(auth)` group URL, which matches no screen. */}
+      <Stack.Protected guard={!!session} redirectTo="/sign-in">
         <Stack.Screen name="(app)" />
       </Stack.Protected>
-      <Stack.Protected guard={!session}>
+      <Stack.Protected guard={!session} redirectTo="/">
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
       <Stack.Screen name="reset-password" />

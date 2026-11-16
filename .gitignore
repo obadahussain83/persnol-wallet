@@ -43,3 +43,6 @@ example
 /android
 .env
 public/@powersync/
+
+# Supabase CLI cache
+supabase/.temp/

@@ -71,5 +71,10 @@ export const ar: Translations = {
     outstanding: 'المتبقي', settled: 'مسدَّد', markSettled: 'تم السداد', reopen: 'إعادة فتح',
     empty: 'لا توجد ديون هنا', emptyHint: 'اضغط + لتسجيل مبلغ لك عند أحد أو مبلغ عليك لأحد.', deleteTitle: 'حذف هذا الدين؟',
   },
+  export: {
+    title: 'بياناتك', button: 'تصدير إلى Excel', hint: 'يحفظ كل عملياتك وحساباتك وديونك في ملف Excel واحد.',
+    exported: 'تم تصدير {{file}}', type: 'النوع', scope: 'شخصي / شغل', balance: 'الرصيد', status: 'الحالة',
+    received: 'المبلغ المستلم', receivedCurrency: 'عملة الاستلام',
+  },
   more: { title: 'المزيد' },
 };

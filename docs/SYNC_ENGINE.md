@@ -52,6 +52,6 @@ Each occurrence gets a **deterministic id** = UUIDv5(rule_id + occurrence date).
 ## Cloud setup (needs your accounts)
 
 1. Create a Supabase project (free). Copy URL + anon key into `.env`.
-2. Apply `supabase/migrations/*.sql` (SQL editor, or `npx supabase db push`).
-3. Create a PowerSync Cloud instance (free), connect it to the Supabase database, enable Supabase JWT auth, paste `powersync/sync-rules.yaml`. Copy the instance URL into `.env`.
+2. Apply `supabase/migrations/*.sql` (SQL editor, or `npx supabase db push`). They already create the `powersync` publication, so skip PowerSync's sample `CREATE PUBLICATION`; only its `powersync_role` and `GRANT SELECT` steps are needed.
+3. Create a PowerSync Cloud instance (free), connect it to the Supabase database, enable Supabase JWT auth, paste `powersync/sync-rules.yaml` into Sync Streams (edition 3). Copy the instance URL into `.env`.
 4. Restart `npm run web`, sign in (auth UI arrives in Phase 1), and run the offline scenario in TESTING.md.

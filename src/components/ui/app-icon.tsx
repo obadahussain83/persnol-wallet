@@ -1,5 +1,5 @@
 import {
-  Archive, ArchiveRestore, ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, List, Search, Baby, Banknote, BookOpen, Briefcase, Building2, Bus, Car, Check, ChefHat, ChevronRight,
+  Archive, ArchiveRestore, ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ChevronDown, List, Search, Baby, Banknote, BookOpen, Briefcase, Building2, Bus, Car, Check, ChefHat, ChevronRight, Download,
   CircleEllipsis, CirclePlus, Clapperboard, Cloud, CloudOff, Coffee, Coins, CreditCard, Droplet, Dumbbell, Ellipsis, Fuel,
   Gamepad2, Gift, GraduationCap, HeartPulse, House, Landmark, Laptop, LayoutDashboard, LogOut, type LucideIcon, Music,
   PawPrint, Pencil, PiggyBank, Plane, Plus, Receipt, RefreshCw, Repeat, Settings, Shirt, ShoppingBag, Smartphone, Tag, Tags,
@@ -23,7 +23,7 @@ const ICONS: Record<string, LucideIcon> = {
   'archive-restore': ArchiveRestore, trash: Trash2, 'chevron-right': ChevronRight, check: Check, cloud: Cloud,
   'cloud-off': CloudOff, 'refresh-cw': RefreshCw, 'log-out': LogOut, x: X, pencil: Pencil,
   'arrow-left-right': ArrowLeftRight, 'arrow-down-left': ArrowDownLeft, 'arrow-up-right': ArrowUpRight,
-  'chevron-down': ChevronDown, list: List, search: Search,
+  'chevron-down': ChevronDown, download: Download, list: List, search: Search,
 };
 
 export const ACCOUNT_ICONS = ['wallet', 'landmark', 'smartphone', 'piggy-bank', 'credit-card', 'banknote', 'coins'];
