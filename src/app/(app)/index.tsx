@@ -1,7 +1,7 @@
 import { useQuery } from '@powersync/react';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AccountCard } from '@/components/account-card';
@@ -12,18 +12,20 @@ import { ThemedText } from '@/components/themed-text';
 import { TransactionItem } from '@/components/transaction-item';
 import { Button, Card, EmptyState, IconBadge, Screen, SectionTitle } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
+import { daysUntil, DUE_SOON_DAYS } from '@/data/cheques';
+import { crossRate, type FxRow, ratesOf } from '@/data/fx';
 import {
   ACCOUNT_BALANCES_SQL, type AccountBalance, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
   TRANSACTIONS_LIST_SQL, type TransactionListRow,
 } from '@/db/queries';
 import { useTheme } from '@/hooks/use-theme';
-import { monthRange } from '@/lib/dates';
-import { formatMoney, sumMinor } from '@/lib/money';
+import { dayKey, monthRange } from '@/lib/dates';
+import { convert, formatMoney, sumMinor } from '@/lib/money';
 import { useUser } from '@/session/session-provider';
 
 type Totals = { currency: string; scope: 'personal' | 'work'; income_minor: number; expense_minor: number };
 
-// Net worth across currencies needs exchange rates (Phase 4); totals are shown per currency.
+// Balances are shown per currency; with more than one, an approximate total in the primary currency is added.
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -33,6 +35,11 @@ export default function Dashboard() {
   const { data: month } = useQuery<Totals>(SCOPE_TOTALS_SQL, range);
   const { data: recent } = useQuery<TransactionListRow>(TRANSACTIONS_LIST_SQL, [6]);
   const { data: debts } = useQuery<OutstandingDebt>(OUTSTANDING_DEBTS_SQL);
+  const { data: fxRows } = useQuery<FxRow>('SELECT id, per_usd, base, fetched_at, manual FROM fx_rates');
+  const soonKey = useMemo(() => { const d = new Date(); return dayKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + DUE_SOON_DAYS, 12).toISOString()); }, []);
+  const { data: dueCheques } = useQuery<{ id: string; direction: 'incoming' | 'outgoing'; person: string; amount_minor: number; currency: string; due_date: string }>(
+    `SELECT id, direction, person, amount_minor, currency, due_date FROM cheques
+     WHERE status = 'pending' AND due_date <= ? ORDER BY due_date LIMIT 5`, [soonKey]);
   const { data: profile } = useQuery<{ display_name: string | null; primary_currency: string }>(
     'SELECT display_name, primary_currency FROM profiles WHERE id = ?', [userId]);
 
@@ -47,6 +54,12 @@ export default function Dashboard() {
     currency: c,
     total: sumMinor(accounts.filter((a) => a.currency === c).map((a) => a.balance_minor)),
   }));
+  const primary = profile[0]?.primary_currency ?? 'ILS';
+  const rates = ratesOf(fxRows);
+  // Null until every needed rate is known (first launch offline): better no total than a wrong one.
+  const combined = balances.length > 1 && balances.every((b) => crossRate(rates, b.currency, primary))
+    ? sumMinor(balances.map((b) => convert(b.total, b.currency, primary, crossRate(rates, b.currency, primary)!)))
+    : null;
   // Personal totals ride on the hero of their currency; a card is only needed for work, or a currency with no hero.
   const monthRows = [...personal.filter((p) => !balances.some((b) => b.currency === p.currency)), ...workRows];
 
@@ -66,6 +79,13 @@ export default function Dashboard() {
               );
             })}
           </Reveal>
+          {combined !== null && (
+            <Card testID="combined-total">
+              <ThemedText type="small" themeColor="textSecondary">{t('dashboard.combined', { currency: primary })}</ThemedText>
+              <ThemedText style={styles.statValue}>≈ {money(combined, primary)}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">{t('dashboard.combinedHint')}</ThemedText>
+            </Card>
+          )}
           <Reveal index={1} style={styles.cta}><Button label={t('tx.add')} icon="plus" onPress={() => router.push('/add')} /></Reveal>
 
           {monthRows.length ? (
@@ -92,6 +112,31 @@ export default function Dashboard() {
           ) : null}
         </>
       )}
+
+      {dueCheques.length ? (
+        <Reveal index={3} style={styles.stack}>
+          <View style={styles.sectionRow}>
+            <SectionTitle>{t('cheques.dueSoon')}</SectionTitle>
+            <Button variant="ghost" label={t('common.viewAll')} onPress={() => router.push('/cheques')} />
+          </View>
+          <Card>
+            {dueCheques.map((c) => {
+              const d = daysUntil(c.due_date);
+              const incoming = c.direction === 'incoming';
+              return (
+                <Pressable key={c.id} accessibilityRole="link" onPress={() => router.push(`/cheques/${c.id}`)} style={styles.chequeRow}>
+                  <IconBadge icon={incoming ? 'arrow-down-left' : 'arrow-up-right'} color={incoming ? theme.income : theme.expense} size={32} />
+                  <ThemedText style={styles.flex} numberOfLines={1}>{c.person}</ThemedText>
+                  <ThemedText type="small" style={{ color: d < 0 ? theme.danger : theme.warning }}>
+                    {d < 0 ? t('cheques.overdue', { count: -d }) : d === 0 ? t('cheques.dueToday') : t('cheques.dueIn', { count: d })}
+                  </ThemedText>
+                  <ThemedText type="smallBold">{money(c.amount_minor, c.currency)}</ThemedText>
+                </Pressable>
+              );
+            })}
+          </Card>
+        </Reveal>
+      ) : null}
 
       {accounts.length ? (
         <Reveal index={3} style={styles.stack}>
@@ -153,12 +198,14 @@ function Stat({ label, value, color }: { label: string; value: string; color: st
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  chequeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44 },
   monthRow: { flexDirection: 'row', gap: Spacing.three },
   stat: { flex: 1, gap: 2 },
   statValue: { fontSize: 18, lineHeight: 24, fontWeight: '700', fontVariant: ['tabular-nums'] },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.three },
   stack: { gap: Spacing.three },
-  cta: { alignSelf: 'flex-start' }, // hugs its label; a full-width slab would outweigh the balance above it
+  cta: { alignSelf: 'stretch' }, // full width, like every other primary button in the app
   // 150 lets the two directions sit side by side on a phone.
   debt: { flexGrow: 1, flexBasis: 150, minWidth: 0, padding: Spacing.three },
   debtHead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },

@@ -8,8 +8,14 @@ import { Card, Screen } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-// Mobile overflow menu. Budgets, reports and goals join here in later phases.
+// Mobile overflow menu.
 const ITEMS: { href: Href; icon: string; label: string }[] = [
+  { href: '/reports', icon: 'chart-column', label: 'nav.reports' },
+  { href: '/budgets', icon: 'target', label: 'nav.budgets' },
+  { href: '/recurring', icon: 'repeat', label: 'nav.recurring' },
+  { href: '/contacts', icon: 'user', label: 'nav.contacts' },
+  { href: '/invoices', icon: 'receipt', label: 'nav.invoices' },
+  { href: '/cheques', icon: 'receipt', label: 'nav.cheques' },
   { href: '/debts', icon: 'coins', label: 'nav.debts' },
   { href: '/categories', icon: 'tags', label: 'nav.categories' },
   { href: '/settings', icon: 'settings', label: 'nav.settings' },

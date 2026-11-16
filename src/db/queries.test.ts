@@ -12,6 +12,7 @@ function setup() {
     CREATE TABLE transactions (id TEXT, type TEXT, account_id TEXT, amount_minor INTEGER, currency TEXT,
       to_account_id TEXT, to_amount_minor INTEGER, occurred_at TEXT, deleted_at TEXT);
     CREATE TABLE debts (id TEXT, direction TEXT, amount_minor INTEGER, currency TEXT, settled_at TEXT);
+    CREATE TABLE debt_payments (id TEXT, debt_id TEXT, amount_minor INTEGER);
     INSERT INTO accounts (id, name, currency, opening_balance_minor) VALUES ('cash','Cash','ILS',10000), ('bank','Bank','ILS',0), ('usd','USD','USD',0);
   `);
   const tx = db.prepare('INSERT INTO transactions VALUES (?,?,?,?,?,?,?,?,?)');
@@ -51,10 +52,11 @@ test('outstanding debts group by direction and currency, exclude settled rows, a
   debt.run('3', 'owed_to_me', 250, 'USD', null);
   debt.run('4', 'owed_to_me', 9000, 'ILS', '2026-11-01T00:00:00Z');
   debt.run('5', 'i_owe', 300, 'USD', null);
+  db.exec("INSERT INTO debt_payments VALUES ('p1', '2', 2000), ('p2', '2', 500)"); // partly repaid
 
   const rows = db.prepare(OUTSTANDING_DEBTS_SQL).all();
   assert.deepEqual(rows.map((r) => ({ ...r })), [
-    { direction: 'i_owe', currency: 'ILS', amount_minor: 7000 },
+    { direction: 'i_owe', currency: 'ILS', amount_minor: 4500 },
     { direction: 'i_owe', currency: 'USD', amount_minor: 300 },
     { direction: 'owed_to_me', currency: 'USD', amount_minor: 1500 },
   ]);

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { ACCOUNT_BALANCES_SQL, PERIOD_TOTALS_SQL } from '../db/queries.ts';
-import { createAccount, setAccountArchived } from './accounts.ts';
+import { createAccount, deleteAccount, setAccountArchived } from './accounts.ts';
 import { createCategory } from './categories.ts';
 import { DomainError } from './db.ts';
 import { createTransaction, createTransfer, deleteTransaction } from './transactions.ts';
@@ -81,4 +81,14 @@ test('work vs personal: totals split by scope; work profit = work income − wor
     { currency: 'ILS', scope: 'work', income_minor: 300000, expense_minor: 50000 },
   ]);
   await assert.rejects(tx('expense', cash, food, '1', 'other' as 'work'));
+});
+
+test('deleteAccount removes the account and its transactions, including transfers into other accounts', async () => {
+  const { db, cash, bank, food, balances } = await setup();
+  await createTransaction(db, U, { type: 'expense', accountId: bank, categoryId: food, amount: '10', occurredAt: day, note: '' });
+  await createTransfer(db, U, { fromAccountId: bank, toAccountId: cash, amount: '20', toAmount: '', occurredAt: day, note: '' });
+  await deleteAccount(db, bank);
+  assert.equal(await db.getOptional('SELECT 1 AS x FROM accounts WHERE id = ?', [bank]), null);
+  assert.equal((await db.getAll('SELECT 1 AS x FROM transactions WHERE deleted_at IS NULL')).length, 0);
+  assert.equal((await balances()).Cash, 10000); // transfer into Cash undone
 });

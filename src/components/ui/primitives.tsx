@@ -74,7 +74,7 @@ export function Button({ label, onPress, variant = 'primary', icon, loading, dis
       ]}>
       {loading ? <ActivityIndicator color={fg} /> : icon ? (
         // The icon sits in its own disc, so it reads as a part of the button rather than a glyph beside the label.
-        <View style={[styles.buttonIcon, { backgroundColor: solid ? 'rgba(255,255,255,0.2)' : theme.backgroundSelected }]}>
+        <View style={[styles.buttonIcon, { backgroundColor: solid ? `${fg}26` : theme.backgroundSelected }]}>
           <AppIcon name={icon} size={16} color={fg} />
         </View>
       ) : null}

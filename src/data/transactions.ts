@@ -47,15 +47,22 @@ function positiveMinor(amount: string, currency: string): number {
   return minor;
 }
 
-export async function createTransaction(db: Db, userId: string, input: TransactionInput): Promise<string> {
-  const v = transactionInputSchema.parse(input);
+/** Validates an income/expense against its account and category; returns the account and the amount in minor units. */
+export async function resolveTransaction(db: Db, v: z.output<typeof transactionInputSchema>) {
   const account = await activeAccount(db, v.accountId);
   const category = await db.getOptional<{ kind: string; archived_at: string | null }>(
     'SELECT kind, archived_at FROM categories WHERE id = ?', [v.categoryId]);
   // An expense must use an expense category (and vice versa), or reports would misclassify it.
   if (!category || category.archived_at || category.kind !== v.type) throw new DomainError('chooseCategory');
-  const amount = positiveMinor(v.amount, account.currency);
-  const id = await newId(db);
+  return { account, amount: positiveMinor(v.amount, account.currency) };
+}
+
+/** `fixedId` makes the insert idempotent: if that row already exists (even soft-deleted), nothing is written. */
+export async function createTransaction(db: Db, userId: string, input: TransactionInput, fixedId?: string): Promise<string> {
+  const v = transactionInputSchema.parse(input);
+  if (fixedId && (await db.getOptional('SELECT 1 AS x FROM transactions WHERE id = ?', [fixedId]))) return fixedId;
+  const { account, amount } = await resolveTransaction(db, v);
+  const id = fixedId ?? (await newId(db));
   const now = nowIso();
   await db.execute(
     `INSERT INTO transactions (id, user_id, type, account_id, amount_minor, currency, category_id, occurred_at, notes, scope, created_at, updated_at)

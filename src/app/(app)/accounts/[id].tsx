@@ -13,7 +13,7 @@ import { errorMessage, FormTextField } from '@/components/ui/form';
 import { Button, ChoiceGrid, EmptyState, Screen, Segmented } from '@/components/ui/primitives';
 import { Radius } from '@/constants/theme';
 import {
-  ACCOUNT_TYPES, accountHasTransactions, accountInputSchema, CURRENCIES, createAccount, setAccountArchived, updateAccount,
+  ACCOUNT_TYPES, accountHasTransactions, accountInputSchema, CURRENCIES, createAccount, deleteAccount, setAccountArchived, updateAccount,
 } from '@/data/accounts';
 import type { AccountRow } from '@/db/schema';
 import { useTheme } from '@/hooks/use-theme';
@@ -81,6 +81,18 @@ export default function AccountForm() {
     }
   };
 
+  const remove = async () => {
+    const body = (await accountHasTransactions(db, id)) ? t('accounts.deleteBodyWithTx') : t('categories.deleteBody');
+    if (await confirm({ title: t('accounts.deleteTitle'), body, confirmLabel: t('common.delete'), destructive: true })) {
+      try {
+        await deleteAccount(db, id);
+        goBack('/accounts');
+      } catch (e) {
+        setError(errorMessage(e));
+      }
+    }
+  };
+
   const { control } = form;
   return (
     <Screen title={isNew ? t('accounts.new') : t('accounts.edit')} narrow>
@@ -115,6 +127,7 @@ export default function AccountForm() {
         <Button variant="secondary" icon={row?.archived_at ? 'archive-restore' : 'archive'}
           label={row?.archived_at ? t('common.restore') : t('common.archive')} onPress={archive} />
       )}
+      {!isNew && <Button variant="secondary" icon="trash" label={t('common.delete')} onPress={remove} />}
     </Screen>
   );
 }

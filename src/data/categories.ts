@@ -82,6 +82,8 @@ export async function deleteCategory(db: Db, id: string): Promise<void> {
     [id, id],
   );
   if (used) throw new DomainError('categoryInUse');
+  await db.execute('DELETE FROM budgets WHERE category_id = ?', [id]);
+  await db.execute('DELETE FROM recurring WHERE category_id = ?', [id]);
   await db.execute('DELETE FROM categories WHERE id = ?', [id]);
 }
 

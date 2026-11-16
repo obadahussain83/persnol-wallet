@@ -11,7 +11,7 @@ const labelOf = (c: { key: string | null; name: string | null }) => c.name ?? c.
 
 const tx = (over: Partial<TransactionListRow>): TransactionListRow => ({
   id: 'x', type: 'expense', scope: 'personal', amount_minor: 0, currency: 'ILS', to_amount_minor: null, to_currency: null,
-  occurred_at: '2026-11-10T12:00:00Z', notes: null, account_name: 'Cash', to_account_name: null,
+  occurred_at: '2026-11-10T12:00:00Z', notes: null, account_id: 'a1', to_account_id: null, category_id: null, account_name: 'Cash', to_account_name: null,
   category_key: null, category_name: null, category_icon: null, category_color: null, ...over,
 });
 

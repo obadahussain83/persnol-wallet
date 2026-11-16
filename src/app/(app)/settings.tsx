@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { FxRatesCard } from '@/components/fx-rates-card';
 import { SyncStatus } from '@/components/sync-status';
 import { ThemedText } from '@/components/themed-text';
 import { useConfirm } from '@/components/ui/confirm-dialog';
@@ -99,6 +100,9 @@ export default function Settings() {
             </View>
           )} />
       </Card>
+
+      <SectionTitle>{t('fx.title')}</SectionTitle>
+      <FxRatesCard primary={profile[0]?.primary_currency ?? 'ILS'} />
 
       {/* shortcut: web only (browser download); native needs expo-file-system + expo-sharing and a new dev build. */}
       {Platform.OS === 'web' ? (

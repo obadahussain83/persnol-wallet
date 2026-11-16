@@ -9,32 +9,43 @@ import { errorMessage } from '@/components/ui/form';
 import { Button, ChoiceGrid, EmptyState, IconBadge, Screen, Segmented, TextField } from '@/components/ui/primitives';
 import { Radius, Spacing } from '@/constants/theme';
 import { orderCategoryTree } from '@/data/categories';
+import { createRecurring, generateDue } from '@/data/recurring';
 import { createTransaction, createTransfer } from '@/data/transactions';
 import { ACCOUNT_BALANCES_SQL, type AccountBalance } from '@/db/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
+import { dayKey } from '@/lib/dates';
 import { goBack } from '@/lib/navigation';
 import { useUser } from '@/session/session-provider';
 
 type Kind = 'expense' | 'income' | 'transfer';
 type Cat = { id: string; key: string | null; name: string | null; parent_id: string | null; color: string | null; icon: string | null; uses: number };
 type Scope = 'personal' | 'work';
+type Repeat = 'none' | 'weekly' | 'monthly' | 'yearly';
 
 // Quick add: type → amount → category (or destination account) → save. Today is preselected.
 export default function AddTransaction() {
+  const p = useLocalSearchParams<{ type?: Kind; amount?: string; note?: string }>();
+  // The tab stays mounted, so a new prefill (e.g. from a cleared cheque) must remount the form to take effect.
+  return <AddForm key={`${p.type ?? ''}|${p.amount ?? ''}|${p.note ?? ''}`} />;
+}
+
+function AddForm() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { db, userId } = useUser();
-  const params = useLocalSearchParams<{ type?: Kind }>();
+  // amount/note can be prefilled, e.g. when a cleared cheque is recorded.
+  const params = useLocalSearchParams<{ type?: Kind; amount?: string; note?: string }>();
   const [kind, setKind] = useState<Kind>(params.type ?? 'expense');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(params.amount ?? '');
   const [toAmount, setToAmount] = useState('');
   const [accountId, setAccountId] = useState('');
   const [toAccountId, setToAccountId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [when, setWhen] = useState<'today' | 'yesterday'>('today');
   const [scope, setScope] = useState<Scope>('personal');
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(params.note ?? '');
+  const [repeat, setRepeat] = useState<Repeat>('none');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [amountFocused, setAmountFocused] = useState(false);
@@ -72,6 +83,12 @@ export default function AddTransaction() {
     try {
       if (kind === 'transfer') {
         await createTransfer(db, userId, { fromAccountId: from?.id ?? '', toAccountId: to?.id ?? '', amount, toAmount, occurredAt, note });
+      } else if (repeat !== 'none') {
+        // The rule creates this first occurrence (and any later ones) itself.
+        await createRecurring(db, userId, {
+          type: kind, accountId: from?.id ?? '', categoryId, amount, note, scope, frequency: repeat, startDate: dayKey(occurredAt),
+        });
+        await generateDue(db, userId, now);
       } else {
         await createTransaction(db, userId, { type: kind, accountId: from?.id ?? '', categoryId, amount, occurredAt, note, scope });
       }
@@ -156,6 +173,11 @@ export default function AddTransaction() {
       )}
       <Segmented label={t('tx.date')} value={when} onChange={setWhen}
         options={[{ value: 'today', label: t('common.today') }, { value: 'yesterday', label: t('common.yesterday') }]} />
+      {kind !== 'transfer' && (
+        <Segmented<Repeat> label={t('recurring.repeat')} value={repeat} onChange={setRepeat}
+          options={[{ value: 'none', label: t('recurring.none') }, { value: 'weekly', label: t('recurring.weekly') },
+            { value: 'monthly', label: t('recurring.monthly') }, { value: 'yearly', label: t('recurring.yearly') }]} />
+      )}
       <TextField label={`${t('tx.note')} (${t('common.optional')})`} value={note} onChangeText={setNote} maxLength={500} />
 
       {error ? <ThemedText type="small" style={{ color: theme.danger }} accessibilityLiveRegion="polite">{error}</ThemedText> : null}

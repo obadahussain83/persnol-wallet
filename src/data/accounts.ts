@@ -72,6 +72,18 @@ export async function setAccountArchived(db: Db, id: string, archived: boolean):
   await db.execute('UPDATE accounts SET archived_at = ?, updated_at = ? WHERE id = ?', [archived ? now : null, now, id]);
 }
 
+/** Deletes the account and soft-deletes every transaction that touches it (transfers included). */
+export async function deleteAccount(db: Db, id: string): Promise<void> {
+  const now = nowIso();
+  // shortcut: two writes without a DB transaction (Db has none); a crash between them leaves the account with no transactions, still deletable.
+  await db.execute(
+    'UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE (account_id = ? OR to_account_id = ?) AND deleted_at IS NULL',
+    [now, now, id, id],
+  );
+  await db.execute('DELETE FROM recurring WHERE account_id = ?', [id]);
+  await db.execute('DELETE FROM accounts WHERE id = ?', [id]);
+}
+
 export async function accountHasTransactions(db: Db, id: string): Promise<boolean> {
   const row = await db.getOptional(
     'SELECT 1 AS x FROM transactions WHERE account_id = ? OR to_account_id = ? LIMIT 1',

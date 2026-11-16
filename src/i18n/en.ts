@@ -5,7 +5,7 @@ export const en = {
     confirm: 'Confirm', retry: 'Try again', back: 'Back', showArchived: 'Show archived', archived: 'Archived', none: 'None', optional: 'optional',
     all: 'All', moreOptions: 'More options', fewerOptions: 'Fewer options', search: 'Search', viewAll: 'View all', today: 'Today', yesterday: 'Yesterday',
   },
-  nav: { transactions: 'Transactions', add: 'Add', dashboard: 'Dashboard', home: 'Home', accounts: 'Accounts', debts: 'Debts', categories: 'Categories', settings: 'Settings', more: 'More' },
+  nav: { transactions: 'Transactions', add: 'Add', dashboard: 'Dashboard', home: 'Home', accounts: 'Accounts', debts: 'Debts', categories: 'Categories', settings: 'Settings', more: 'More', reports: 'Reports', budgets: 'Budgets', recurring: 'Recurring', cheques: 'Cheques', contacts: 'Clients & suppliers', invoices: 'Invoices' },
   auth: {
     tagline: 'Every shekel, accounted for.',
     signIn: 'Sign in', signUp: 'Create account', email: 'Email', password: 'Password', confirmPassword: 'Confirm password',
@@ -15,6 +15,10 @@ export const en = {
     checkEmail: 'Check your email to confirm your account, then sign in.', invalidLink: 'This reset link is invalid or expired.',
   },
   errors: {
+    noItems: 'Add at least one item.', invalidQuantity: 'Enter a quantity above zero.', invoicePaid: 'A paid invoice can’t be changed. Reopen it first.',
+    invalidPhone: 'Use digits only, e.g. +970 59 123 4567.', paymentTooLarge: 'That is more than what remains.', amountBelowPaid: 'The amount can’t be less than what was already paid.',
+    invalidDate: 'Enter a date like 2026-12-01.',
+    budgetExists: 'This category already has a budget in this currency.',
     required: 'Required', tooLong: 'Too long', invalid: 'Invalid value', invalidAmount: 'Invalid amount for this currency',
     invalidEmail: 'Enter a valid email', passwordShort: 'At least 8 characters', passwordMismatch: 'Passwords do not match',
     currencyLocked: 'Currency can’t change once the account has transactions.',
@@ -29,6 +33,7 @@ export const en = {
     empty: 'No accounts yet', emptyHint: 'Add your cash, bank and wallet accounts to start tracking.',
     archiveTitle: 'Archive this account?', archiveBody: 'It will be hidden from lists and totals. Its history is kept and you can restore it any time.',
     currencyLockedHint: 'Locked: this account already has transactions.',
+    deleteTitle: 'Delete this account?', deleteBodyWithTx: 'All its transactions (including transfers) will be deleted too. This can’t be undone.',
   },
   categories: {
     title: 'Categories', new: 'New category', edit: 'Edit category', name: 'Name', kind: 'Type', parent: 'Parent category',
@@ -55,9 +60,12 @@ export const en = {
   dashboard: {
     greeting: 'Hello, {{name}}', greetingNoName: 'Hello', balances: 'Balances', accounts: 'Accounts',
     thisMonth: 'This month', personal: 'Personal', work: 'Work', workProfit: 'Work profit', income: 'Income', expenses: 'Expenses', net: 'Net', recent: 'Recent transactions',
+    combined: 'All balances in {{currency}}', combinedHint: 'Approximate, at current exchange rates.',
     emptyTitle: 'Welcome to Personal Wallet', emptyHint: 'Start by adding the accounts you hold money in.',
   },
   tx: {
+    custom: 'Custom', fromDate: 'From (YYYY-MM-DD)', toDate: 'To (optional)', dateHint: 'Leave “To” empty for a single day.', invalidRange: 'Enter valid dates, with “From” before “To”.',
+    filters: 'Filters', period: 'Period', allTime: 'All time', thisMonth: 'This month', lastMonth: 'Last month', thisYear: 'This year', clearFilters: 'Clear filters',
     title: 'Transactions', add: 'Add transaction', scope: 'Personal or work?', personal: 'Personal', work: 'Work', expense: 'Expense', income: 'Income', transfer: 'Transfer',
     amount: 'Amount', account: 'Account', from: 'From', to: 'To', toAmount: 'Amount received ({{currency}})',
     category: 'Category', note: 'Note', date: 'Date', empty: 'No transactions yet', emptyHint: 'Tap + to record your first expense or income.',
@@ -65,6 +73,11 @@ export const en = {
     noAccountsHint: 'Transactions are recorded against an account, like Cash or Bank.', noResults: 'Nothing matches your search',
   },
   debts: {
+    dueDate: 'Due date (YYYY-MM-DD)', phone: 'Phone (for WhatsApp)', payments: 'Payments', paidOf: '{{paid}} of {{total}} paid',
+    remaining: '{{amount}} left', paymentAmount: 'Payment amount', addPayment: 'Add payment', remind: 'Remind on WhatsApp',
+    dueOn: 'Due {{date}}', paidSoFar: '{{amount}} paid',
+    reminderText: 'Hi {{person}}, a friendly reminder about the {{amount}} still outstanding. Thanks!',
+    reminderTextDue: 'Hi {{person}}, a friendly reminder about the {{amount}} due on {{date}}. Thanks!',
     title: 'Debts', new: 'New debt', edit: 'Edit debt', owedToMe: 'Owed to me', iOwe: 'I owe', person: 'Person',
     outstanding: 'Outstanding', settled: 'Settled', markSettled: 'Mark as settled', reopen: 'Reopen',
     empty: 'No debts here', emptyHint: 'Tap + to record money someone owes you or money you owe.', deleteTitle: 'Delete this debt?',
@@ -75,5 +88,54 @@ export const en = {
     received: 'Amount received', receivedCurrency: 'Received currency',
   },
   more: { title: 'More' },
+  invoices: {
+    title: 'Invoices & quotes', invoices: 'Invoices', quotes: 'Quotes', invoice: 'Invoice', quote: 'Quote',
+    new: 'New invoice', newQuote: 'New quote', edit: 'Edit invoice', client: 'Client', issueDate: 'Date (YYYY-MM-DD)', dueDate: 'Due date',
+    items: 'Items', item: 'Description', quantity: 'Qty', unitPrice: 'Unit price', addItem: 'Add item', total: 'Total',
+    number: 'No.', billTo: 'Bill to', from: 'From', unpaid: 'Waiting for payment',
+    pdf: 'Print / PDF', whatsapp: 'Send on WhatsApp', markSent: 'Mark as sent', markPaid: 'Mark as paid', toInvoice: 'Turn into invoice',
+    reopen: 'Reopen', cancel: 'Cancel it', lockedHint: 'reopen to edit', popupBlocked: 'Allow pop-ups for this site to print.',
+    recordBody: 'Add the invoice total as income to one of your accounts.',
+    status: { draft: 'Draft', sent: 'Sent', paid: 'Paid', cancelled: 'Cancelled' },
+    empty: 'Nothing here yet', emptyHint: 'Create an invoice or quote, print it as PDF or send it on WhatsApp.', deleteTitle: 'Delete this?',
+  },
+  contacts: {
+    title: 'Clients & suppliers', new: 'New contact', edit: 'Edit contact', clients: 'Clients', suppliers: 'Suppliers',
+    client: 'Client', supplier: 'Supplier', name: 'Name', contact: 'Client / supplier', none: 'None', open: '{{count}} open',
+    balance: 'Open balance', settledUp: 'Nothing open', owesMe: 'Owes me {{amount}}', iOweThem: 'I owe {{amount}}',
+    statement: 'Statement', details: 'Details',
+    empty: 'No contacts yet', emptyHint: 'Add the people and shops you deal with, then link debts and cheques to them.',
+    deleteTitle: 'Delete this contact?', deleteBody: 'Its debts and cheques stay, just without the link.',
+  },
+  fx: {
+    title: 'Exchange rates', hint: 'Used for the combined total in {{currency}}. Type a rate to fix it yourself.',
+    oneUnit: '1 {{code}} in {{primary}}', manual: 'Set by you', useAuto: 'Use automatic rate', refresh: 'Update rates', refreshed: 'Rates updated.',
+    offline: 'Couldn’t reach the rates service. The last known rates are kept.', updated: 'Updated {{when}}', never: 'Not downloaded yet',
+  },
+  cheques: {
+    title: 'Cheques', new: 'New cheque', edit: 'Edit cheque', cheque: 'Cheque', incoming: 'Received', outgoing: 'Written',
+    person: 'From / to', dueDate: 'Due date (YYYY-MM-DD)', bank: 'Bank', number: 'Cheque number',
+    pendingOnly: 'Pending', pending: 'Pending', cleared: 'Cleared', bounced: 'Bounced', pendingTotal: 'Pending total',
+    dueToday: 'Due today', dueIn: 'In {{count}}d', overdue: '{{count}}d overdue', dueSoon: 'Cheques due soon',
+    markCleared: 'Cleared', markBounced: 'Bounced', markPending: 'Back to pending',
+    recordTitle: 'Record it as a transaction?', recordBody: 'Add the cheque amount to one of your accounts so balances stay right.', record: 'Record',
+    empty: 'No cheques here', emptyHint: 'Track cheques you received or wrote, with their due dates.', deleteTitle: 'Delete this cheque?',
+  },
+  recurring: {
+    title: 'Recurring', repeat: 'Repeat', none: 'Once', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly',
+    next: 'Next: {{date}}', paused: 'Paused', pause: 'Pause', resume: 'Resume',
+    empty: 'No recurring transactions', emptyHint: 'When adding a transaction, choose Weekly, Monthly or Yearly under Repeat — like rent or salary.',
+    deleteTitle: 'Stop this recurring transaction?', deleteBody: 'No new ones will be added. Transactions already recorded stay.',
+  },
+  budgets: {
+    title: 'Budgets', new: 'New budget', edit: 'Edit budget', empty: 'No budgets yet',
+    emptyHint: 'Set a monthly limit for a category and watch your spending against it.',
+    monthlyLimit: 'Monthly limit', hint: 'Spending in its subcategories counts too. Resets every month.',
+    left: '{{amount}} left', over: '{{amount}} over budget', deleteTitle: 'Delete this budget?',
+  },
+  reports: {
+    title: 'Reports', net: 'Net', profit: 'Profit', byCategory: 'Spending by category', trend: 'Last 6 months',
+    noExpenses: 'No expenses in this period', uncategorized: 'Uncategorized',
+  },
 };
 export type Translations = typeof en;

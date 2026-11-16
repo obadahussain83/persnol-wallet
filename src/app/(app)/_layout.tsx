@@ -9,9 +9,11 @@ import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { PressableScale } from '@/components/ui/motion';
 import { DesktopBreakpoint, Radius, Spacing } from '@/constants/theme';
+import { useFxRefresh } from '@/hooks/use-fx-refresh';
+import { useRecurringGenerator } from '@/hooks/use-recurring-generator';
 import { useTheme } from '@/hooks/use-theme';
 
-type Href = '/' | '/transactions' | '/add' | '/accounts' | '/debts' | '/categories' | '/settings' | '/more';
+type Href = '/' | '/transactions' | '/add' | '/accounts' | '/debts' | '/categories' | '/settings' | '/more' | '/budgets' | '/reports' | '/recurring' | '/cheques' | '/contacts' | '/invoices';
 type NavItem = { name: string; href: Href; icon: string; label: string; mobileLabel?: string; desktop: boolean; mobile: boolean; primary?: boolean; activeFor?: string[] };
 
 const NAV: Record<string, NavItem> = {
@@ -21,18 +23,26 @@ const NAV: Record<string, NavItem> = {
   accounts: { name: 'accounts', href: '/accounts', icon: 'wallet', label: 'nav.accounts', desktop: true, mobile: true },
   categories: { name: 'categories', href: '/categories', icon: 'tags', label: 'nav.categories', desktop: true, mobile: false },
   settings: { name: 'settings', href: '/settings', icon: 'settings', label: 'nav.settings', desktop: true, mobile: false },
+  reports: { name: 'reports', href: '/reports', icon: 'chart-column', label: 'nav.reports', desktop: true, mobile: false },
+  budgets: { name: 'budgets', href: '/budgets', icon: 'target', label: 'nav.budgets', desktop: true, mobile: false },
+  recurring: { name: 'recurring', href: '/recurring', icon: 'repeat', label: 'nav.recurring', desktop: true, mobile: false },
+  invoices: { name: 'invoices', href: '/invoices', icon: 'receipt', label: 'nav.invoices', desktop: true, mobile: false },
+  contacts: { name: 'contacts', href: '/contacts', icon: 'user', label: 'nav.contacts', desktop: true, mobile: false },
+  cheques: { name: 'cheques', href: '/cheques', icon: 'receipt', label: 'nav.cheques', desktop: true, mobile: false },
   debts: { name: 'debts', href: '/debts', icon: 'coins', label: 'nav.debts', desktop: true, mobile: false },
-  more: { name: 'more', href: '/more', icon: 'ellipsis', label: 'nav.more', desktop: false, mobile: true, activeFor: ['/debts', '/categories', '/settings'] },
+  more: { name: 'more', href: '/more', icon: 'ellipsis', label: 'nav.more', desktop: false, mobile: true, activeFor: ['/reports', '/budgets', '/recurring', '/cheques', '/contacts', '/invoices', '/debts', '/categories', '/settings'] },
 };
 // Every route is registered in both layouts; each layout orders them and hides the ones it doesn't use.
-const DESKTOP_ORDER = ['add', 'index', 'transactions', 'accounts', 'debts', 'categories', 'settings', 'more'];
-const MOBILE_ORDER = ['index', 'transactions', 'add', 'accounts', 'more', 'debts', 'categories', 'settings'];
+const DESKTOP_ORDER = ['add', 'index', 'transactions', 'accounts', 'reports', 'budgets', 'recurring', 'cheques', 'contacts', 'invoices', 'debts', 'categories', 'settings', 'more'];
+const MOBILE_ORDER = ['index', 'transactions', 'add', 'accounts', 'more', 'reports', 'budgets', 'recurring', 'cheques', 'contacts', 'invoices', 'debts', 'categories', 'settings'];
 
 export default function AppLayout() {
   const wide = useWindowDimensions().width >= DesktopBreakpoint;
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  useRecurringGenerator();
+  useFxRefresh();
 
   const triggers = (wide ? DESKTOP_ORDER : MOBILE_ORDER).map((key) => {
     const item = NAV[key];
