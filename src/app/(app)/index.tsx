@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AccountCard } from '@/components/account-card';
 import { BalanceHero } from '@/components/balance-hero';
+import { DonutChart, type Slice, topSlices, TrendChart } from '@/components/charts';
 import { Reveal } from '@/components/ui/motion';
 import { SyncStatus } from '@/components/sync-status';
 import { ThemedText } from '@/components/themed-text';
@@ -15,13 +16,14 @@ import { Spacing } from '@/constants/theme';
 import { daysUntil, DUE_SOON_DAYS } from '@/data/cheques';
 import { type FxRow, ratesOf } from '@/data/fx';
 import {
-  ACCOUNT_BALANCES_SQL, type AccountBalance, BUDGET_PROGRESS_SQL, type BudgetProgress, type CategorySpend, EXPENSE_BY_CATEGORY_SQL, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
+  ACCOUNT_BALANCES_SQL, type AccountBalance, BUDGET_PROGRESS_SQL, FLOW_SINCE_SQL, type BudgetProgress, type CategorySpend, EXPENSE_BY_CATEGORY_SQL, OUTSTANDING_DEBTS_SQL, type OutstandingDebt, SCOPE_TOTALS_SQL,
   TRANSACTIONS_LIST_SQL, type TransactionListRow,
 } from '@/db/queries';
 import { useTheme } from '@/hooks/use-theme';
 import { categoryLabel } from '@/i18n';
 import { dayKey, monthRange, monthToDateRanges } from '@/lib/dates';
 import { type Insight, monthInsights } from '@/lib/insights';
+import { flowStart, type FlowRow, monthlyFlow } from '@/lib/reports';
 import { formatMoney, sumMinor } from '@/lib/money';
 import { netWorth } from '@/lib/net-worth';
 import { useUser } from '@/session/session-provider';
@@ -42,6 +44,8 @@ export default function Dashboard() {
   const { data: thisSpend } = useQuery<CategorySpend>(EXPENSE_BY_CATEGORY_SQL, mtd.current);
   const { data: lastSpend } = useQuery<CategorySpend>(EXPENSE_BY_CATEGORY_SQL, mtd.previous);
   const { data: budgetRows } = useQuery<BudgetProgress>(BUDGET_PROGRESS_SQL, range);
+  const trendSince = useMemo(() => flowStart(TREND_MONTHS), []);
+  const { data: flowRows } = useQuery<FlowRow>(FLOW_SINCE_SQL, [trendSince]);
   const { data: fxRows } = useQuery<FxRow>('SELECT id, per_usd, base, fetched_at, manual FROM fx_rates');
   const soonKey = useMemo(() => { const d = new Date(); return dayKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + DUE_SOON_DAYS, 12).toISOString()); }, []);
   const { data: dueCheques } = useQuery<{ id: string; direction: 'incoming' | 'outgoing'; person: string; amount_minor: number; currency: string; due_date: string }>(
@@ -80,6 +84,17 @@ export default function Dashboard() {
     overBudgets: budgetRows.filter((b) => b.spent_minor > b.amount_minor).length,
   });
   const insightText = (i: Insight) => t(`insights.${i.key}`, i);
+  // Charts are in the primary currency; categories keep their own colors, the long tail folds into "Other".
+  const slices = topSlices(Object.values(thisSpend.filter((r) => r.currency === primary).reduce<Record<string, Slice>>((acc, r) => {
+    const key = r.category_id ?? 'none';
+    acc[key] = {
+      key, value: (acc[key]?.value ?? 0) + r.total_minor, color: r.category_color ?? theme.textSecondary,
+      label: r.category_id ? categoryLabel({ key: r.category_key, name: r.category_name }) : t('reports.uncategorized'),
+    };
+    return acc;
+  }, {})), 5, t('dashboard.other'), theme.textSecondary);
+  const trend = monthlyFlow(flowRows, primary, TREND_MONTHS);
+  const hasTrend = trend.some((m) => m.income || m.expense);
   // Personal totals ride on the hero of their currency; a card is only needed for work, or a currency with no hero.
   const monthRows = [...personal.filter((p) => !balances.some((b) => b.currency === p.currency)), ...workRows];
 
@@ -118,6 +133,22 @@ export default function Dashboard() {
               <ThemedText type="smallBold">{t('insights.title')}</ThemedText>
               {insights.map((i) => <ThemedText key={i.key} type="small" themeColor="textSecondary">• {insightText(i)}</ThemedText>)}
             </Card>
+          )}
+          {(slices.length > 0 || hasTrend) && (
+            <View style={styles.charts}>
+              {slices.length > 0 && (
+                <Card style={styles.chartCard}>
+                  <ThemedText type="smallBold">{t('dashboard.spendingThisMonth')}</ThemedText>
+                  <DonutChart slices={slices} currency={primary} title={t('tx.expense')} />
+                </Card>
+              )}
+              {hasTrend && (
+                <Card style={styles.chartCard}>
+                  <ThemedText type="smallBold">{t('reports.trend')}</ThemedText>
+                  <TrendChart flow={trend} currency={primary} height={110} />
+                </Card>
+              )}
+            </View>
           )}
           <Reveal index={1} style={styles.cta}><Button label={t('tx.add')} icon="plus" onPress={() => router.push('/add')} /></Reveal>
 
@@ -230,7 +261,11 @@ function Stat({ label, value, color }: { label: string; value: string; color: st
   );
 }
 
+const TREND_MONTHS = 6;
+
 const styles = StyleSheet.create({
+  charts: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.three },
+  chartCard: { flexGrow: 1, flexBasis: 320, gap: Spacing.three },
   flex: { flex: 1 },
   chequeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, minHeight: 44 },
   monthRow: { flexDirection: 'row', gap: Spacing.three },

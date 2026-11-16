@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { TrendChart } from '@/components/charts';
 import { ProgressBar } from '@/components/progress-bar';
 import { ThemedText } from '@/components/themed-text';
 import { Card, EmptyState, IconBadge, Screen, SectionTitle, Segmented } from '@/components/ui/primitives';
@@ -18,16 +19,12 @@ import { useUser } from '@/session/session-provider';
 type Period = 'month' | 'lastMonth' | 'year';
 type Scope = 'all' | 'personal' | 'work';
 const TREND_MONTHS = 6;
-const CHART_HEIGHT = 140;
 
 function periodRange(p: Period, now: Date): [string, string] {
   if (p === 'lastMonth') return monthRange(new Date(now.getFullYear(), now.getMonth() - 1, 1));
   if (p === 'year') return [new Date(now.getFullYear(), 0, 1).toISOString(), new Date(now.getFullYear() + 1, 0, 1).toISOString()];
   return monthRange(now);
 }
-
-/** Empty months draw nothing; tiny non-zero values stay visible. */
-const barHeight = (v: number, max: number) => (v > 0 ? Math.max(3, (v / max) * CHART_HEIGHT) : 0);
 
 export default function Reports() {
   const { t, i18n } = useTranslation();
@@ -73,8 +70,6 @@ export default function Reports() {
   const cats = spend.filter((r) => r.currency === currency);
   const catTotal = cats.reduce((a, r) => a + r.total_minor, 0);
   const flow = monthlyFlow(flowRows, currency, TREND_MONTHS, now);
-  const flowMax = Math.max(1, ...flow.flatMap((m) => [m.income, m.expense]));
-  const monthName = new Intl.DateTimeFormat(i18n.language, { month: 'short' });
 
   return (
     <Screen title={t('reports.title')}>
@@ -126,22 +121,7 @@ export default function Reports() {
 
       <SectionTitle>{t('reports.trend')}</SectionTitle>
       <Card>
-        <View style={styles.legend}>
-          <View style={[styles.dot, { backgroundColor: theme.income }]} /><ThemedText type="small">{t('tx.income')}</ThemedText>
-          <View style={[styles.dot, { backgroundColor: theme.expense }]} /><ThemedText type="small">{t('tx.expense')}</ThemedText>
-        </View>
-        <View style={styles.chart} accessibilityRole="image"
-          accessibilityLabel={flow.map((m) => `${monthName.format(m.start)}: ${t('tx.income')} ${money(m.income)}, ${t('tx.expense')} ${money(m.expense)}`).join('. ')}>
-          {flow.map((m) => (
-            <View key={m.start.toISOString()} style={styles.col}>
-              <View style={styles.bars}>
-                <View style={[styles.bar, { height: barHeight(m.income, flowMax), backgroundColor: theme.income }]} />
-                <View style={[styles.bar, { height: barHeight(m.expense, flowMax), backgroundColor: theme.expense }]} />
-              </View>
-              <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>{monthName.format(m.start)}</ThemedText>
-            </View>
-          ))}
-        </View>
+        <TrendChart flow={flow} currency={currency} />
       </Card>
     </Screen>
   );
@@ -153,10 +133,4 @@ const styles = StyleSheet.create({
   summary: { flexDirection: 'row', gap: Spacing.two },
   stat: { flex: 1, gap: Spacing.one },
   catRow: { gap: Spacing.one, paddingVertical: Spacing.one },
-  legend: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two },
-  col: { flex: 1, alignItems: 'center', gap: Spacing.one },
-  bars: { height: CHART_HEIGHT, flexDirection: 'row', alignItems: 'flex-end', gap: 3 },
-  bar: { width: 10, borderRadius: 4 },
 });

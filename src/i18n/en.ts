@@ -61,6 +61,7 @@ export const en = {
   dashboard: {
     greeting: 'Hello, {{name}}', greetingNoName: 'Hello', balances: 'Balances', accounts: 'Accounts',
     thisMonth: 'This month', personal: 'Personal', work: 'Work', workProfit: 'Work profit', income: 'Income', expenses: 'Expenses', net: 'Net', recent: 'Recent transactions',
+    spendingThisMonth: 'Spending this month', other: 'Other',
     netWorth: 'Net worth in {{currency}}', worthBalances: 'balances {{amount}}', worthOwed: '+ owed to you {{amount}}', worthOwe: '− you owe {{amount}}',
     combinedHint: 'Approximate, at current exchange rates.',
     emptyTitle: 'Welcome to Personal Wallet', emptyHint: 'Start by adding the accounts you hold money in.',

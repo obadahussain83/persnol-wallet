@@ -61,6 +61,7 @@ export const ar: Translations = {
   },
   sync: { localOnly: 'على هذا الجهاز فقط', offline: 'غير متصل', syncing: 'جارٍ المزامنة…', synced: 'متزامن', connecting: 'جارٍ الاتصال…', pending: '{{count}} قيد الانتظار' },
   dashboard: {
+    spendingThisMonth: 'مصاريف هالشهر', other: 'غير ذلك',
     netWorth: 'صافي الثروة بالـ {{currency}}', worthBalances: 'الأرصدة {{amount}}', worthOwed: '+ إلك عند الناس {{amount}}', worthOwe: '− عليك {{amount}}',
     combinedHint: 'تقريبي، حسب أسعار الصرف الحالية.',
     greeting: 'مرحبًا، {{name}}', greetingNoName: 'مرحبًا', balances: 'الأرصدة', accounts: 'الحسابات',
