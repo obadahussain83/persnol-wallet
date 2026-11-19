@@ -11,7 +11,7 @@ import { ProgressBar } from '@/components/progress-bar';
 import { ThemedText } from '@/components/themed-text';
 import { AppIcon } from '@/components/ui/app-icon';
 import { useConfirm } from '@/components/ui/confirm-dialog';
-import { errorMessage, FormTextField } from '@/components/ui/form';
+import { errorMessage, FormDateField, FormTextField } from '@/components/ui/form';
 import { Button, Card, EmptyState, Screen, SectionTitle, Segmented, TextField } from '@/components/ui/primitives';
 import { Spacing } from '@/constants/theme';
 import { CURRENCIES } from '@/data/accounts';
@@ -127,7 +127,7 @@ export default function DebtForm() {
         <Segmented label={t('accounts.currency')} value={field.value} onChange={field.onChange} options={CURRENCIES.map((c) => ({ value: c, label: c }))} />
       )} />
       <FormTextField control={control} name="amount" label={t('tx.amount')} keyboardType="decimal-pad" inputMode="decimal" />
-      <FormTextField control={control} name="dueDate" label={`${t('debts.dueDate')} (${t('common.optional')})`} placeholder="2026-12-01" inputMode="numeric" />
+      <FormDateField control={control} name="dueDate" label={`${t('debts.dueDate')} (${t('common.optional')})`} />
       <FormTextField control={control} name="phone" label={`${t('debts.phone')} (${t('common.optional')})`} placeholder="+970 59 123 4567" inputMode="tel" maxLength={30} />
       <FormTextField control={control} name="note" label={`${t('tx.note')} (${t('common.optional')})`} multiline maxLength={500} />
       {error ? <ThemedText type="small" style={{ color: theme.danger }} accessibilityLiveRegion="polite">{error}</ThemedText> : null}

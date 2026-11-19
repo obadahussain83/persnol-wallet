@@ -6,6 +6,7 @@ import { ZodError } from 'zod';
 import { DomainError } from '@/data/db';
 import i18n from '@/i18n';
 
+import { DateField } from './date-field';
 import { TextField } from './primitives';
 
 /** Zod messages are i18n keys under `errors.`; anything unknown falls back to a generic message. */
@@ -37,6 +38,28 @@ export function FormTextField<T extends FieldValues>({ control, name, label, ...
           onBlur={field.onBlur}
           error={translateError(fieldState.error?.message)}
           {...rest}
+        />
+      )}
+    />
+  );
+}
+
+export function FormDateField<T extends FieldValues>({ control, name, label }: {
+  control: Control<T>; name: Path<T>; label: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState }) => (
+        <DateField
+          label={label}
+          value={field.value ?? ''}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          error={translateError(fieldState.error?.message)}
+          clearLabel={t('common.clear')}
         />
       )}
     />

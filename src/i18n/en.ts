@@ -1,7 +1,7 @@
 export const en = {
   app: { name: 'Personal Wallet' },
   common: {
-    save: 'Save', cancel: 'Cancel', delete: 'Delete', archive: 'Archive', restore: 'Restore', add: 'Add',
+    save: 'Save', cancel: 'Cancel', delete: 'Delete', archive: 'Archive', restore: 'Restore', add: 'Add', clear: 'Clear',
     confirm: 'Confirm', retry: 'Try again', back: 'Back', showArchived: 'Show archived', archived: 'Archived', none: 'None', optional: 'optional',
     all: 'All', moreOptions: 'More options', fewerOptions: 'Fewer options', search: 'Search', viewAll: 'View all', today: 'Today', yesterday: 'Yesterday',
   },

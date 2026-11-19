@@ -3,7 +3,7 @@ import type { Translations } from './en';
 export const ar: Translations = {
   app: { name: 'المحفظة الشخصية' },
   common: {
-    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', archive: 'أرشفة', restore: 'استعادة', add: 'إضافة',
+    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', archive: 'أرشفة', restore: 'استعادة', add: 'إضافة', clear: 'مسح',
     confirm: 'تأكيد', retry: 'إعادة المحاولة', back: 'رجوع', showArchived: 'عرض المؤرشف', archived: 'مؤرشف', none: 'بدون', optional: 'اختياري',
     all: 'الكل', moreOptions: 'خيارات إضافية', fewerOptions: 'خيارات أقل', search: 'بحث', viewAll: 'عرض الكل', today: 'اليوم', yesterday: 'أمس',
   },
